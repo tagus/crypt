@@ -1,43 +1,22 @@
-// Copyright © 2017 NAME HERE <EMAIL ADDRESS>
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package cmd
 
 import (
 	"fmt"
 	"os"
-
-	homedir "github.com/mitchellh/go-homedir"
+	"encoding/json"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+	"github.com/fatih/color"
+	homedir "github.com/mitchellh/go-homedir"
 )
 
-var cfgFile string
+var key, cryptFile string
 
-// RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "crypt",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+	Short: "A secure credential store",
+	Long:`Crypt is CLI application to securely store your credentials
+	so that you don't have to worry about remembering all of your
+	internet accounts`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -49,41 +28,59 @@ func Execute() {
 	}
 }
 
-func init() { 
-	cobra.OnInitialize(initConfig)
-
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.crypt.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+func init() {
+	cobra.OnInitialize(initCrypt)
+	// RootCmd.PersistentFlags().StringVar(&cryptFile, "crypt", "", "cipher text credential store (default is $HOME/.crypt)")
 }
 
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+type Credential struct {
+	Username			string
+	Password			string
+}
+
+type Crypt struct {
+	Credentials []Credential
+}
+
+func initCrypt() {
+	home, _ := homedir.Dir()
+	cryptFilePath := fmt.Sprintf("%s/.crypt", home)
+
+	if _, err := os.Stat(cryptFilePath); os.IsNotExist(err) {
+		color.Yellow("Crypt file not found")
+		fmt.Print("Would you like to create one [y/n] ")
+		var response string
+		fmt.Scanln(&response)
+
+		if response == "y" || response == "yes" {
+			// cryptFile, err := os.Create(cryptFilePath)
+			// if err != nil {
+			// 	color.Red("There was an error during crypt file creation")
+			// 	os.Exit(1)
+			// }
+
+			color.Green("Crypt file created at '%s'", cryptFilePath)
+			credentials := []Credential {
+				Credential {"sdk282", "s@f3pa$$w0rd"},
+				Credential {"tom233", "apple"},
+			}
+			crypt := Crypt{credentials}
+			cryptData, _ := json.Marshal(crypt)
+			// cryptData, _ := json.Marshal(Credential{"tom@gmail.com", "burrito"})
+
+			fmt.Printf("%s\n", cryptData)
+			var cryptDecoded Crypt
+			if err := json.Unmarshal(cryptData, &cryptDecoded); err != nil {
+				color.Red("There was an error unmarshalling data: %s", err)
+				os.Exit(1)
+			}
+
+			fmt.Println(cryptDecoded)
+			// cryptFile.Close()
+		} else {
+			os.Exit(0)
 		}
-
-		// Search config in home directory with name ".crypt" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".crypt")
-	}
-
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	} else {
+		color.Green("Crypt file found")
 	}
 }

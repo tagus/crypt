@@ -16,6 +16,8 @@ import (
 var (
 	Debugging bool
 	CryptFile *backend.CryptFile
+	CryptPath string
+	KeyString string
 )
 
 var rootCmd = &cobra.Command{
@@ -56,15 +58,15 @@ func initCrypt() {
 	}
 
 	ui := input.DefaultUI()
-	cryptPath := filepath.Join(homePath, ".cryptfile")
+	CryptPath = filepath.Join(homePath, ".cryptfile")
 
-	fileBytes, err := backend.ReadCrypt(cryptPath)
+	fileBytes, err := backend.ReadCrypt(CryptPath)
 	if err != nil {
 		fmt.Println(err)
-		newCryptFlow(ui, cryptPath)
+		newCryptFlow(ui, CryptPath)
 	} else {
-		keystring := readKey(ui)
-		CryptFile, err = backend.Decode(keystring, fileBytes)
+		KeyString = readKey(ui)
+		CryptFile, err = backend.Decode(KeyString, fileBytes)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -84,8 +86,8 @@ func newCryptFlow(ui *input.UI, cryptPath string) {
 	}
 
 	if makeFile == "yes" || makeFile == "y" {
-		keyString := readKey(ui)
-		err = backend.MakeNewCrypt(keyString, cryptPath)
+		KeyString := readKey(ui)
+		err = backend.MakeNewCrypt(KeyString, cryptPath)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

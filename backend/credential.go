@@ -24,3 +24,7 @@ type SecurityQuestion struct {
 	Question string `json:"question"`
 	Answer   string `json:"answer"`
 }
+
+func (c *CryptFile) AddCredential(cred Credential) {
+	c.Credentials = append(c.Credentials, cred)
+}

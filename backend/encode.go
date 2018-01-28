@@ -15,7 +15,7 @@ import (
 
 // Encode encodes the given list of Crendtials into
 // a byte array
-func Encode(keystring string, cryptFile CryptFile) ([]byte, error) {
+func Encode(keystring string, cryptFile *CryptFile) ([]byte, error) {
 	json, err := json.Marshal(cryptFile)
 	if err != nil {
 		return nil, err
@@ -30,7 +30,6 @@ func Encode(keystring string, cryptFile CryptFile) ([]byte, error) {
 }
 
 func Encrypt(keystring string, cryptJson []byte) ([]byte, error) {
-	fmt.Println(string(cryptJson))
 	key := []byte(keystring)
 
 	// Creating the AES cypher
@@ -73,7 +72,7 @@ func MakeNewCrypt(keystring, cryptPath string) error {
 		UpdatedAt: time.Now(),
 	}
 
-	cypherBytes, err := Encode(keystring, cryptFile)
+	cypherBytes, err := Encode(keystring, &cryptFile)
 
 	if err != nil {
 		return err
@@ -85,5 +84,19 @@ func MakeNewCrypt(keystring, cryptPath string) error {
 	}
 
 	fmt.Printf("cryptfile created at '%s'\n", color.YellowString("%s", cryptPath))
+	return nil
+}
+
+func ReEncode(cryptFile *CryptFile, cryptPath string, keyString string) error {
+	cryptBytes, err := Encode(keyString, cryptFile)
+	if err != nil {
+		return err
+	}
+
+	err = SaveCrypt(cryptBytes, cryptPath)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

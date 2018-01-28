@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -14,7 +15,7 @@ import (
 
 var (
 	Debugging bool
-	CryptFile backend.CryptFile
+	CryptFile *backend.CryptFile
 )
 
 var rootCmd = &cobra.Command{
@@ -25,8 +26,6 @@ so that you don't have to worry about remembering all of your
 internet accounts`,
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
@@ -56,18 +55,20 @@ func initCrypt() {
 		os.Exit(1)
 	}
 
-	ui := &input.UI{
-		Writer: os.Stdout,
-		Reader: os.Stdin,
-	}
-
+	ui := input.DefaultUI()
 	cryptPath := filepath.Join(homePath, ".cryptfile")
 
-	_, err = backend.ReadCrypt(cryptPath)
+	fileBytes, err := backend.ReadCrypt(cryptPath)
 	if err != nil {
+		fmt.Println(err)
 		newCryptFlow(ui, cryptPath)
 	} else {
-
+		keystring := readKey(ui)
+		CryptFile, err = backend.Decode(keystring, fileBytes)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 	}
 }
 
@@ -83,7 +84,8 @@ func newCryptFlow(ui *input.UI, cryptPath string) {
 	}
 
 	if makeFile == "yes" || makeFile == "y" {
-		err := backend.MakeNewCrypt(cryptPath)
+		keyString := readKey(ui)
+		err = backend.MakeNewCrypt(keyString, cryptPath)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -93,4 +95,28 @@ func newCryptFlow(ui *input.UI, cryptPath string) {
 		color.Red("Did not create cryptfile")
 		os.Exit(0)
 	}
+}
+
+func readKey(ui *input.UI) string {
+	query := "What is your key?"
+	keyString, err := ui.Ask(query, &input.Options{
+		Required: true,
+		Loop:     true,
+		Mask:     false,
+		ValidateFunc: func(s string) error {
+			if len(s) < 16 {
+				msg := color.RedString("%s", "key is too small. must be at least 16 bytes")
+				return errors.New(msg)
+			}
+
+			return nil
+		},
+	})
+
+	if err != nil {
+		fmt.Println(keyString)
+		os.Exit(1)
+	}
+
+	return keyString
 }

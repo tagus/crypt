@@ -24,5 +24,9 @@ func init() {
 }
 
 func listServices(cmd *cobra.Command, args []string) {
-	fmt.Printf("%s total services\n", color.YellowString("%d", len(Credentials)))
+	credentials := CryptFile.Credentials
+	fmt.Printf("%s total services\n", color.YellowString("%d", len(credentials)))
+	for _, c := range credentials {
+		fmt.Println(c.Service)
+	}
 }

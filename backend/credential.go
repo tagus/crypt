@@ -1,5 +1,14 @@
 package backend
 
+import "time"
+
+// Represents contents of a crypt file
+type CryptFile struct {
+	Credentials []Credential
+	UpdatedAt   time.Time
+	CreatedAt   time.Time
+}
+
 // Houses all pertinent information for a given service
 type Credential struct {
 	Service     string

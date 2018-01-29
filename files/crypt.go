@@ -20,17 +20,17 @@ type CryptStore struct {
 }
 
 // Creates an empty crypt file in the given path.
-func createDefaultCryptFile(path string) error {
+func createDefaultCryptFile(path string, crypto secure.Crypto) error {
 	credMap := make(map[string]creds.Credential)
 	now := time.Now().Unix()
 	crypt := &creds.Crypt{credMap, now, now}
 
-	json, err := crypt.GetJson()
+	enc, err := crypto.Encrypt(crypt)
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(path, json, perm)
+	err = ioutil.WriteFile(path, enc, perm)
 	if err != nil {
 		return err
 	}
@@ -41,16 +41,16 @@ func createDefaultCryptFile(path string) error {
 // Initializes a default crypt store using the AES crypto implementation.
 // If the crypt file does not exist, one will be created in the provided path.
 func InitDefaultStore(path, pwd string) (*CryptStore, error) {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		err := createDefaultCryptFile(path)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	crypto, err := secure.InitAesCrypto(pwd)
 	if err != nil {
 		return nil, err
+	}
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		err := createDefaultCryptFile(path, crypto)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	data, err := ioutil.ReadFile(path)

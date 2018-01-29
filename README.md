@@ -8,8 +8,8 @@ The strength of a password is limited by its convention and length.
 Easy to remember usually means easier to crack. Committing a long password is hard
 and storing the password in plaintext in your pc is a major point of failure.
 
-Crypt will use a 256 MD5 hash as the key. The hash will be computed from
-a key string from the users.
+Crypt will use a SHA256 hash as the key. The hash will be computed from
+a password provided by the user.
 
 ## Commands
 

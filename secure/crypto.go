@@ -1,4 +1,4 @@
-package crypto
+package secure
 
 import "github.com/sugatpoudel/crypt/creds"
 

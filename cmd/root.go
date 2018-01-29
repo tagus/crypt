@@ -1,23 +1,10 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 
-	"github.com/fatih/color"
-	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
-	"github.com/sugatpoudel/crypt/backend"
-	input "github.com/tcnksm/go-input"
-)
-
-var (
-	Debugging bool
-	CryptFile *backend.CryptFile
-	CryptPath string
-	KeyString string
 )
 
 var rootCmd = &cobra.Command{
@@ -37,88 +24,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initCrypt)
-	rootCmd.PersistentFlags().BoolVarP(&Debugging, "debug", "d", false, "toggle debugging mode")
-}
-
-type Credential struct {
-	Service  string
-	Username string
-	Password string
-}
-
-type Crypt struct {
-	Credentials []Credential
 }
 
 func initCrypt() {
-	homePath, err := homedir.Dir()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	ui := input.DefaultUI()
-	CryptPath = filepath.Join(homePath, ".cryptfile")
-
-	fileBytes, err := backend.ReadCrypt(CryptPath)
-	if err != nil {
-		fmt.Println(err)
-		newCryptFlow(ui, CryptPath)
-	} else {
-		KeyString = readKey(ui)
-		CryptFile, err = backend.Decode(KeyString, fileBytes)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-	}
-}
-
-func newCryptFlow(ui *input.UI, cryptPath string) {
-	query := "No Crypt file found. Would you like to make one?"
-	makeFile, err := ui.Ask(query, &input.Options{
-		Default: "n",
-	})
-
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	if makeFile == "yes" || makeFile == "y" {
-		KeyString := readKey(ui)
-		err = backend.MakeNewCrypt(KeyString, cryptPath)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		os.Exit(0)
-	} else {
-		color.Red("Did not create cryptfile")
-		os.Exit(0)
-	}
-}
-
-func readKey(ui *input.UI) string {
-	query := "What is your key?"
-	keyString, err := ui.Ask(query, &input.Options{
-		Required: true,
-		Loop:     true,
-		Mask:     false,
-		ValidateFunc: func(s string) error {
-			if len(s) < 16 {
-				msg := color.RedString("%s", "key is too small. must be at least 16 bytes")
-				return errors.New(msg)
-			}
-
-			return nil
-		},
-	})
-
-	if err != nil {
-		fmt.Println(keyString)
-		os.Exit(1)
-	}
-
-	return keyString
 }

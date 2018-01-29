@@ -14,8 +14,8 @@ var (
 // Represents contents of a crypt file
 type Crypt struct {
 	Credentials map[string]Credential `json:"credentials"`
-	UpdatedAt   time.Time             `json:"updated_at"`
-	CreatedAt   time.Time             `json:"created_at"`
+	UpdatedAt   int64                 `json:"updated_at"`
+	CreatedAt   int64                 `json:"created_at"`
 }
 
 // Houses all pertinent information for a given service
@@ -53,12 +53,12 @@ func (c *Crypt) RemoveCredential(service string) {
 	delete(c.Credentials, service)
 }
 
-func (c *Crypt) GetCreatedAt() string {
-	return c.CreatedAt.Format("Jan 2 15:04:05, 2006")
+func (c *Crypt) GetCreatedAt() time.Time {
+	return time.Unix(c.CreatedAt, 0)
 }
 
-func (c *Crypt) GetUpdatedAt() string {
-	return c.UpdatedAt.Format("Jan 2 15:04:05, 2006")
+func (c *Crypt) GetUpdatedAt() time.Time {
+	return time.Unix(c.UpdatedAt, 0)
 }
 
 func (c *Crypt) GetJson() ([]byte, error) {

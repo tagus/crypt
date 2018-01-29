@@ -24,8 +24,8 @@ var (
 		Credentials: map[string]Credential{
 			"ebay": ebay,
 		},
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		CreatedAt: time.Now().Unix(),
+		UpdatedAt: time.Now().Unix(),
 	}
 )
 
@@ -39,4 +39,9 @@ func TestRemovingCredential(t *testing.T) {
 	crypt.RemoveCredential("ebay")
 	cred := crypt.FindCredential("ebay")
 	assert.Nil(t, cred, "Did not remove credential properly")
+}
+
+func TestGettingJson(t *testing.T) {
+	_, err := crypt.GetJson()
+	assert.Nil(t, err, "Did not marshall properly")
 }

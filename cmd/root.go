@@ -12,7 +12,10 @@ import (
 	"github.com/sugatpoudel/crypt/files"
 )
 
-var Store *files.CryptStore
+var (
+	Store  *files.CryptStore
+	Deving bool
+)
 
 var rootCmd = &cobra.Command{
 	Use:   "crypt",
@@ -23,7 +26,11 @@ internet accounts.
 
 Crypt assumes the existence of a '.cryptfile' in the home directory
 and tries to decrypt it upon initialization. If such file does not
-exists, one will be created.`,
+exists, one will be created.
+
+Development mode offers an alternate path for a sample crypt file.
+It does not prompt for a password. This is meant solely
+for sandboxing. DO NOT STORE ANY CREDENTIALS HERE.`,
 }
 
 func Execute() {
@@ -35,6 +42,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initCrypt)
+	rootCmd.PersistentFlags().BoolVarP(&Deving, "dev", "d", false, "toggle development mode")
 }
 
 func printAndExit(err error) {
@@ -46,14 +54,24 @@ func printAndExit(err error) {
 }
 
 func initCrypt() {
-	fmt.Printf("%s ", color.YellowString("Password:"))
-	pwd, err := gopass.GetPasswd()
-	printAndExit(err)
+	var pwd string
+	var filename string
+	if Deving {
+		pwd = "fakefakefake" // NOTE: development pwd, completely meaningless
+		filename = ".dev_cryptfile"
+	} else {
+		fmt.Printf("%s ", color.YellowString("Password:"))
+		pwdB, err := gopass.GetPasswd()
+		printAndExit(err)
+
+		pwd = string(pwdB)
+		filename = ".cryptfile"
+	}
 
 	home, err := homedir.Dir()
 	printAndExit(err)
 
-	path := filepath.Join(home, ".cryptfile")
+	path := filepath.Join(home, filename)
 	store, err := files.InitDefaultStore(path, string(pwd))
 	printAndExit(err)
 

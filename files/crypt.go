@@ -69,6 +69,7 @@ func InitDefaultStore(path, pwd string) (*CryptStore, error) {
 
 // Encrypts the current Crypt and saves it to the path field.
 func (s *CryptStore) Save() error {
+	s.Crypt.UpdatedAt = time.Now().Unix()
 	data, err := s.crypto.Encrypt(s.Crypt)
 	if err != nil {
 		return err

@@ -22,7 +22,7 @@ func init() {
 
 func ls(cmd *cobra.Command, args []string) {
 	creds := Store.Crypt.Credentials
-	fmt.Printf("You have %d stored credentials.\n", len(creds))
+	fmt.Printf("You have %d stored credential(s).\n", len(creds))
 	for _, v := range creds {
 		fmt.Println(v.Service)
 	}

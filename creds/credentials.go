@@ -2,9 +2,12 @@ package creds
 
 import (
 	"encoding/json"
+	"fmt"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 var (
@@ -32,6 +35,25 @@ type Credential struct {
 type SecurityQuestion struct {
 	Question string `json:"question"`
 	Answer   string `json:"answer"`
+}
+
+// Command line output for a credential.
+// Redacts the password
+func (c Credential) PrintCredential() {
+	color.Green("%s (%s)", c.Service, c.Description)
+
+	fmt.Printf("%s: %s\n", color.BlueString("email"), normalizeField(c.Email))
+	fmt.Printf("%s: %s\n", color.BlueString("username"), normalizeField(c.Username))
+	fmt.Printf("%s: [redacted]\n", color.BlueString("password"))
+}
+
+// Returns 'N/A' for empty string
+func normalizeField(field string) string {
+	if field == "" {
+		return color.WhiteString("N/A")
+	} else {
+		return field
+	}
 }
 
 // This is used to add/update the list of credentials
@@ -67,6 +89,12 @@ func (c *Crypt) GetJson() ([]byte, error) {
 		return nil, err
 	}
 	return str, nil
+}
+
+func (c *Crypt) IsValid(service string) bool {
+	key := normalizeName(service)
+	_, ok := c.Credentials[key]
+	return ok
 }
 
 func FromJson(data []byte) (*Crypt, error) {

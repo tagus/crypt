@@ -45,29 +45,27 @@ func add(cmd *cobra.Command, args []string) {
 	fmt.Print("Decription: ")
 	fmt.Scanln(&desc)
 
-	fmt.Printf("\nEmail: %s\n", email)
-	fmt.Printf("Username: %s\n", user)
-	fmt.Printf("Password: [redacted]\n")
-	fmt.Printf("Description: %s\n", desc)
+	cred := creds.Credential{
+		Service:     service,
+		Email:       email,
+		Username:    user,
+		Password:    pwd,
+		Description: desc,
+	}
 
-	msg := color.YellowString("Does this look right? [y/n]")
+	fmt.Println()
+	cred.PrintCredential()
+	msg := color.YellowString("\nDoes this look right? [y/n]")
 	fmt.Printf("%s ", msg)
 	var confirm string
 	fmt.Scanln(&confirm)
 
 	if confirm == "y" {
-		cred := creds.Credential{
-			Service:     service,
-			Email:       email,
-			Username:    user,
-			Password:    pwd,
-			Description: desc,
-		}
 		Store.Crypt.SetCredential(cred)
 		color.Green("Added service '%s'", service)
 	}
-
 	color.Green("\nSaving crypt")
+
 	err = Store.Save()
 	printAndExit(err)
 }

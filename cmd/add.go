@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 
 	"github.com/fatih/color"
 	"github.com/howeyc/gopass"
@@ -29,7 +31,8 @@ func init() {
 
 func add(cmd *cobra.Command, args []string) {
 	service := args[0]
-	var email, user, desc string
+	reader := bufio.NewReader(os.Stdin)
+	var email, user string
 
 	fmt.Print("Email: ")
 	fmt.Scanln(&email)
@@ -42,8 +45,18 @@ func add(cmd *cobra.Command, args []string) {
 	printAndExit(err)
 	pwd := string(pwdB)
 
+	fmt.Print("Confirm Password: ")
+	pwdB2, err := gopass.GetPasswd()
+	printAndExit(err)
+	pwd2 := string(pwdB2)
+
+	if pwd == "" || pwd != pwd2 {
+		color.Red("Passwords did not match. Try again.")
+		return
+	}
+
 	fmt.Print("Decription: ")
-	fmt.Scanln(&desc)
+	desc, err := reader.ReadString('\n')
 
 	cred := creds.Credential{
 		Service:     service,

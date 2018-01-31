@@ -10,11 +10,11 @@ import (
 	"github.com/howeyc/gopass"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
-	"github.com/sugatpoudel/crypt/files"
+	"github.com/sugatpoudel/crypt/store"
 )
 
 var (
-	Store  *files.CryptStore
+	Store  *store.CryptStore
 	Deving bool
 )
 
@@ -73,7 +73,7 @@ func initCrypt() {
 	printAndExit(err)
 
 	path := filepath.Join(home, filename)
-	store, err := files.InitDefaultStore(path, string(pwd))
+	store, err := store.InitDefaultStore(path, string(pwd))
 	printAndExit(err)
 
 	Store = store

@@ -2,7 +2,7 @@
 A convenient credential store that securely saved account info.
 This `CLI` provides simple commands to add, modify and list all stored credentials.
 
-Crypt stores credentials in an encrypted `encoded` file, `~/.cryptfile`.
+Crypt stores credentials in an encrypted `encoded` file, `~/.cryptfile`
 
 The strength of a password is limited by its convention and length.
 Easy to remember usually means easier to crack. Committing a long password is hard
@@ -21,10 +21,10 @@ Each credential is stored is a `Credential` struct that has the following struct
 
 ```go
 type Credential struct {
-  Service     string            
-  Email       string            
-  Username    string            
-  Password    string            
-  Description string            
+  Service     string
+  Email       string
+  Username    string
+  Password    string
+  Description string
 }
 ```

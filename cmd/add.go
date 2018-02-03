@@ -1,13 +1,12 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 
 	"github.com/fatih/color"
 	"github.com/howeyc/gopass"
 	"github.com/spf13/cobra"
+	"github.com/sugatpoudel/crypt/asker"
 	"github.com/sugatpoudel/crypt/creds"
 )
 
@@ -31,14 +30,13 @@ func init() {
 
 func add(cmd *cobra.Command, args []string) {
 	service := args[0]
-	reader := bufio.NewReader(os.Stdin)
-	var email, user string
+	asker := asker.DefaultAsker()
 
-	fmt.Print("Email: ")
-	fmt.Scanln(&email)
+	email, err := asker.Ask("Email: ", nil)
+	printAndExit(err)
 
-	fmt.Print("Username: ")
-	fmt.Scanln(&user)
+	user, err := asker.Ask("Username: ", nil)
+	printAndExit(err)
 
 	fmt.Print("Password: ")
 	pwdB, err := gopass.GetPasswd()
@@ -55,8 +53,8 @@ func add(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	fmt.Print("Decription: ")
-	desc, err := reader.ReadString('\n')
+	desc, err := asker.Ask("Description: ", nil)
+	printAndExit(err)
 
 	cred := creds.Credential{
 		Service:     service,

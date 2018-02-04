@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/fatih/color"
-	"github.com/howeyc/gopass"
 	"github.com/spf13/cobra"
 	"github.com/sugatpoudel/crypt/asker"
 	"github.com/sugatpoudel/crypt/creds"
@@ -38,20 +37,8 @@ func add(cmd *cobra.Command, args []string) {
 	user, err := asker.Ask("Username: ", nil)
 	printAndExit(err)
 
-	fmt.Print("Password: ")
-	pwdB, err := gopass.GetPasswd()
+	pwd, err := asker.AskSecret("Password: ", nil)
 	printAndExit(err)
-	pwd := string(pwdB)
-
-	fmt.Print("Confirm Password: ")
-	pwdB2, err := gopass.GetPasswd()
-	printAndExit(err)
-	pwd2 := string(pwdB2)
-
-	if pwd == "" || pwd != pwd2 {
-		color.Red("Passwords did not match. Try again.")
-		return
-	}
 
 	desc, err := asker.Ask("Description: ", nil)
 	printAndExit(err)
@@ -66,11 +53,9 @@ func add(cmd *cobra.Command, args []string) {
 
 	fmt.Println()
 	cred.PrintCredential()
-	msg := color.YellowString("\nDoes this look right? [y/n]")
-	fmt.Printf("%s ", msg)
-	var confirm string
-	fmt.Scanln(&confirm)
 
+	msg := color.YellowString("\nDoes this look right? [y/n]")
+	confirm, err := asker.Ask(msg, nil)
 	if confirm == "y" {
 		Store.Crypt.SetCredential(cred)
 		color.Green("Added service '%s'", service)

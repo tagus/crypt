@@ -15,6 +15,7 @@ The hash will be computed from a password provided that the user provides.
 1. `ls` prints the name of all stored credentials
 1. `add` enables the user to add a credential to the `.cryptfile`
 3. `show` prints the fields of the specified *service*
+4. `pwd` copies the password for the specified *service* to the clipboard
 
 ## Structure
 Each credential is stored is a `Credential` struct that has the following structure.

@@ -18,7 +18,7 @@ to the crypt store.
 
 Expects a single argument, however multi word services
 can be espaced using quotes.`,
-	Args:    cobra.ExactArgs(1),
+	Args:    serviceIsNew,
 	Example: "add 'Amazon Web Services'",
 	Run:     add,
 }

@@ -89,3 +89,13 @@ func serviceIsValid(cmd *cobra.Command, args []string) error {
 	}
 	return errors.New("invalid service specified")
 }
+
+func serviceIsNew(cmd *cobra.Command, args []string) error {
+	if len(args) != 1 {
+		return errors.New("requires exactly one arg")
+	}
+	if !Store.Crypt.IsValid(args[0]) {
+		return nil
+	}
+	return errors.New("Service already exists")
+}

@@ -40,7 +40,7 @@ func (a *Asker) Ask(question string, validation Validation) (string, error) {
 
 // Asks for user input without echoing input back to terminal.
 // Note that this method is only supported through stdin
-func (a *Asker) AskSecret(question string, validation Validation) (string, error) {
+func (a *Asker) AskSecret(question string, confirm bool, validation Validation) (string, error) {
 	fmt.Printf("%s ", question)
 	pwd, err := terminal.ReadPassword(0)
 	if err != nil {
@@ -48,15 +48,17 @@ func (a *Asker) AskSecret(question string, validation Validation) (string, error
 	}
 	fmt.Printf("\n")
 
-	fmt.Printf("Confirm %s ", question)
-	conf, err := terminal.ReadPassword(0)
-	if err != nil {
-		return "", err
-	}
-	fmt.Printf("\n")
+	if confirm {
+		fmt.Printf("Confirm %s ", question)
+		conf, err := terminal.ReadPassword(0)
+		if err != nil {
+			return "", err
+		}
+		fmt.Printf("\n")
 
-	if !bytes.Equal(pwd, conf) {
-		return "", errors.New("Confirmation did not match.")
+		if !bytes.Equal(pwd, conf) {
+			return "", errors.New("Confirmation did not match.")
+		}
 	}
 
 	ans := string(pwd)

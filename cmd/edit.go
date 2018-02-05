@@ -46,7 +46,7 @@ func edit(cmd *cobra.Command, args []string) {
 	user, err := asker.Ask("Username: ", nil)
 	printAndExit(err)
 
-	pwd, err := asker.AskSecret("Password: ", nil)
+	pwd, err := asker.AskSecret("Password: ", true, nil)
 	printAndExit(err)
 
 	desc, err := asker.Ask("Description: ", nil)

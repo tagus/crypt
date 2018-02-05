@@ -62,7 +62,7 @@ func initCrypt() {
 		filename = ".dev_cryptfile"
 	} else {
 		asker := asker.DefaultAsker()
-		secret, err := asker.AskSecret(color.YellowString("Password:"), nil)
+		secret, err := asker.AskSecret(color.YellowString("Password:"), false, nil)
 		printAndExit(err)
 
 		pwd = secret

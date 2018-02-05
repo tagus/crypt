@@ -48,7 +48,7 @@ func (a *Asker) AskSecret(question string, validation Validation) (string, error
 	}
 	fmt.Printf("\n")
 
-	fmt.Printf("Confirm: %s ", question)
+	fmt.Printf("Confirm %s ", question)
 	conf, err := terminal.ReadPassword(0)
 	if err != nil {
 		return "", err

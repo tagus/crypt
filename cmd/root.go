@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 
 	"github.com/fatih/color"
-	"github.com/howeyc/gopass"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
+	"github.com/sugatpoudel/crypt/asker"
 	"github.com/sugatpoudel/crypt/store"
 )
 
@@ -61,11 +61,11 @@ func initCrypt() {
 		pwd = "fakefakefake" // NOTE: development pwd, completely meaningless
 		filename = ".dev_cryptfile"
 	} else {
-		fmt.Printf("%s ", color.YellowString("Password:"))
-		pwdB, err := gopass.GetPasswd()
+		asker := asker.DefaultAsker()
+		secret, err := asker.AskSecret(color.YellowString("Password:"), nil)
 		printAndExit(err)
 
-		pwd = string(pwdB)
+		pwd = secret
 		filename = ".cryptfile"
 	}
 
@@ -73,7 +73,7 @@ func initCrypt() {
 	printAndExit(err)
 
 	path := filepath.Join(home, filename)
-	store, err := store.InitDefaultStore(path, string(pwd))
+	store, err := store.InitDefaultStore(path, pwd)
 	printAndExit(err)
 
 	Store = store

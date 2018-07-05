@@ -9,12 +9,13 @@ import (
 	"github.com/sugatpoudel/crypt/creds"
 )
 
-// An AES implementation for crypto with key size of 256 bits
+// AesCrypto is an AES implementation of a Crypto with key size of 256 bits
 type AesCrypto struct {
 	key   [32]byte
 	block cipher.Block
 }
 
+// InitAesCrypto initializes an AesCrypto
 func InitAesCrypto(pwd string) (*AesCrypto, error) {
 	key := computeHash(pwd)
 	var keyBits [32]byte
@@ -28,8 +29,9 @@ func InitAesCrypto(pwd string) (*AesCrypto, error) {
 	return &AesCrypto{keyBits, block}, nil
 }
 
+// Encrypt encrypts the given Crypt using AES
 func (c *AesCrypto) Encrypt(crypt *creds.Crypt) ([]byte, error) {
-	data, err := crypt.GetJson()
+	data, err := crypt.GetJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -47,6 +49,7 @@ func (c *AesCrypto) Encrypt(crypt *creds.Crypt) ([]byte, error) {
 	return enc, nil
 }
 
+// Decrypt decrypts the given Crypt using AES
 func (c *AesCrypto) Decrypt(enc []byte) (*creds.Crypt, error) {
 	if len(enc) < aes.BlockSize {
 		return nil, errors.New("Encrypted data is too small")
@@ -58,7 +61,7 @@ func (c *AesCrypto) Decrypt(enc []byte) (*creds.Crypt, error) {
 	stream := cipher.NewCFBDecrypter(c.block, iv)
 	stream.XORKeyStream(dec, dec)
 
-	crypt, err := creds.FromJson(dec)
+	crypt, err := creds.FromJSON(dec)
 	if err != nil {
 		return nil, err
 	}

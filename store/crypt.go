@@ -12,7 +12,7 @@ import (
 
 const perm = 0600
 
-// Represents a crypt instance stored as a file
+// CryptStore represents a crypt instance stored as a file
 type CryptStore struct {
 	path   string
 	crypto secure.Crypto
@@ -23,7 +23,11 @@ type CryptStore struct {
 func createDefaultCryptFile(path string, crypto secure.Crypto) error {
 	credMap := make(map[string]creds.Credential)
 	now := time.Now().Unix()
-	crypt := &creds.Crypt{credMap, now, now}
+	crypt := &creds.Crypt{
+		Credentials: credMap,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+	}
 
 	enc, err := crypto.Encrypt(crypt)
 	if err != nil {
@@ -38,7 +42,7 @@ func createDefaultCryptFile(path string, crypto secure.Crypto) error {
 	return nil
 }
 
-// Initializes a default crypt store using the AES crypto implementation.
+// InitDefaultStore initializes a default crypt store using the AES crypto implementation.
 // If the crypt file does not exist, one will be created in the provided path.
 func InitDefaultStore(path, pwd string) (*CryptStore, error) {
 	crypto, err := secure.InitAesCrypto(pwd)
@@ -60,14 +64,14 @@ func InitDefaultStore(path, pwd string) (*CryptStore, error) {
 
 	crypt, err := crypto.Decrypt(data)
 	if err != nil {
-		return nil, errors.New("Password was invalid. Decryption failed.")
+		return nil, errors.New("password was invalid, decryption failed")
 	}
 
 	store := &CryptStore{path, crypto, crypt}
 	return store, nil
 }
 
-// Encrypts the current Crypt and saves it to the path field.
+// Save encrypts the current Crypt and saves it to the path field.
 func (s *CryptStore) Save() error {
 	s.Crypt.UpdatedAt = time.Now().Unix()
 	data, err := s.crypto.Encrypt(s.Crypt)
@@ -83,7 +87,7 @@ func (s *CryptStore) Save() error {
 	return nil
 }
 
-// Recreates the Crypto instance with the new password.
+// ChangePwd recreates the Crypto instance with the new password.
 func (s *CryptStore) ChangePwd(pwd string) error {
 	crypto, err := secure.InitAesCrypto(pwd)
 	if err != nil {

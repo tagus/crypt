@@ -14,7 +14,9 @@ import (
 )
 
 var (
-	Store  *store.CryptStore
+	// Store is the current crypt store
+	Store *store.CryptStore
+	// Deving signals that current session is for development
 	Deving bool
 )
 
@@ -34,6 +36,7 @@ It does not prompt for a password. This is meant solely
 for sandboxing. DO NOT STORE ANY CREDENTIALS HERE.`,
 }
 
+// Execute executes the root cobra command
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

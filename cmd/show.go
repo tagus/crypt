@@ -23,7 +23,7 @@ func show(cmd *cobra.Command, args []string) {
 	service := args[0]
 	cred := Store.Crypt.FindCredential(service)
 	if cred == nil {
-		color.Red("service '%s' was not found")
+		color.Red("service '%s' was not found", service)
 		return
 	}
 

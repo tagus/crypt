@@ -29,19 +29,25 @@ var (
 	}
 )
 
-func TestSettingCredential(t *testing.T) {
+func TestSetCredential(t *testing.T) {
 	crypt.SetCredential(amazon)
 	cred := crypt.FindCredential("Amazon Web    Services")
 	assert.NotNil(t, cred, "Did not set credential properly")
 }
 
-func TestRemovingCredential(t *testing.T) {
+func TestRemoveCredential(t *testing.T) {
 	crypt.RemoveCredential("ebay")
 	cred := crypt.FindCredential("ebay")
 	assert.Nil(t, cred, "Did not remove credential properly")
 }
 
-func TestGettingJson(t *testing.T) {
-	_, err := crypt.GetJson()
+func TestGetJSON(t *testing.T) {
+	_, err := crypt.GetJSON()
 	assert.Nil(t, err, "Did not marshall properly")
+}
+
+func TestFindCredential(t *testing.T) {
+	cred := crypt.FindCredential("ebay")
+	assert.NotNil(t, cred, "Did not retrieve credential")
+	assert.Equal(t, "eBay", cred.Service)
 }

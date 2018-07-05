@@ -29,9 +29,8 @@ func init() {
 func noop(old, new string) string {
 	if strings.TrimSpace(new) == "" {
 		return old
-	} else {
-		return new
 	}
+	return new
 }
 
 func edit(cmd *cobra.Command, args []string) {

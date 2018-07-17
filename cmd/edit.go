@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -39,17 +41,41 @@ func edit(cmd *cobra.Command, args []string) {
 
 	oldCred := Store.Crypt.FindCredential(service)
 
-	email, err := asker.Ask("Email: ", nil)
-	printAndExit(err)
+	isNumber := func(str string) error {
+		_, err := strconv.Atoi(strings.Trim(str, " \n"))
+		if err != nil {
+			return err
+		}
+		return nil
+	}
 
-	user, err := asker.Ask("Username: ", nil)
-	printAndExit(err)
+	var email, user, pwd, desc string
+	for {
+		ans, err := asker.Ask("What would you like to edit? ", isNumber)
+		printAndExit(err)
+		exit := false
 
-	pwd, err := asker.AskSecret("Password: ", true, nil)
-	printAndExit(err)
+		switch i, _ := strconv.Atoi(strings.Trim(ans, " ")); i {
+		case 1:
+			email, err = asker.Ask("Email: ", nil)
+			printAndExit(err)
+		case 2:
+			user, err = asker.Ask("Username: ", nil)
+			printAndExit(err)
+		case 3:
+			pwd, err = asker.AskSecret("Password: ", true, nil)
+			printAndExit(err)
+		case 4:
+			desc, err = asker.Ask("Description: ", nil)
+			printAndExit(err)
+		default:
+			exit = true
+		}
 
-	desc, err := asker.Ask("Description: ", nil)
-	printAndExit(err)
+		if exit {
+			break
+		}
+	}
 
 	cred := creds.Credential{
 		Service:     oldCred.Service,
@@ -57,6 +83,8 @@ func edit(cmd *cobra.Command, args []string) {
 		Username:    noop(oldCred.Username, user),
 		Password:    noop(oldCred.Password, pwd),
 		Description: noop(oldCred.Description, desc),
+		CreatedAt:   oldCred.CreatedAt,
+		UpdatedAt:   time.Now().Unix(),
 	}
 
 	fmt.Println()

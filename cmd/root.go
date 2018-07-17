@@ -34,12 +34,13 @@ exists, one will be created.
 Development mode offers an alternate path for a sample crypt file.
 It does not prompt for a password. This is meant solely
 for sandboxing. DO NOT STORE ANY CREDENTIALS HERE.`,
+	SilenceUsage: true,
+	// SilenceErrors: true,
 }
 
 // Execute executes the root cobra command
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
 		os.Exit(1)
 	}
 }
@@ -80,7 +81,7 @@ func initCrypt() {
 	printAndExit(err)
 
 	Store = store
-	color.Green("%s\n\n", "Crypt initialized successfully")
+	color.Green("%s\n", "Crypt initialized successfully")
 }
 
 func serviceIsValid(cmd *cobra.Command, args []string) error {
@@ -90,7 +91,7 @@ func serviceIsValid(cmd *cobra.Command, args []string) error {
 	if Store.Crypt.IsValid(args[0]) {
 		return nil
 	}
-	return errors.New("invalid service specified")
+	return fmt.Errorf("invalid service specified")
 }
 
 func serviceIsNew(cmd *cobra.Command, args []string) error {
@@ -100,5 +101,5 @@ func serviceIsNew(cmd *cobra.Command, args []string) error {
 	if !Store.Crypt.IsValid(args[0]) {
 		return nil
 	}
-	return errors.New("Service already exists")
+	return fmt.Errorf("service already exists")
 }

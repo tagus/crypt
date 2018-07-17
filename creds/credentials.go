@@ -3,15 +3,10 @@ package creds
 import (
 	"encoding/json"
 	"fmt"
-	"regexp"
-	"strings"
 	"time"
 
 	"github.com/fatih/color"
-)
-
-var (
-	spaces = regexp.MustCompile(`\s+`)
+	"github.com/sugatpoudel/crypt/utils"
 )
 
 // Crypt represents contents of a crypt file
@@ -29,6 +24,8 @@ type Credential struct {
 	Password          string             `json:"password"`
 	Description       string             `json:"description"`
 	SecurityQuestions []SecurityQuestion `json:"security_questions"`
+	CreatedAt         int64              `json:"created_at"`
+	UpdatedAt         int64              `json:"updated_at"`
 }
 
 // SecurityQuestion holds a security question and its answer
@@ -37,13 +34,27 @@ type SecurityQuestion struct {
 	Answer   string `json:"answer"`
 }
 
+// GetCreatedAt retrieves the credential's creation time
+func (c *Credential) GetCreatedAt() time.Time {
+	return time.Unix(c.CreatedAt, 0)
+}
+
+// GetUpdatedAt retrieves the credential's last update time
+func (c *Credential) GetUpdatedAt() time.Time {
+	return time.Unix(c.UpdatedAt, 0)
+}
+
 // PrintCredential prints the credentials while redacting the password
 func (c Credential) PrintCredential() {
-	color.Green("%s [%s]", c.Service, c.Description)
+	data := [][]string{
+		[]string{"Email", normalizeField(c.Email)},
+		[]string{"Username", normalizeField(c.Username)},
+		[]string{"Password", "[redacted]"},
+	}
 
-	fmt.Printf("%s: %s\n", color.BlueString("email"), normalizeField(c.Email))
-	fmt.Printf("%s: %s\n", color.BlueString("username"), normalizeField(c.Username))
-	fmt.Printf("%s: [redacted]\n", color.BlueString("password"))
+	caption := fmt.Sprintf("%s [%s]", c.Service, c.Description)
+	utils.PrintTable(data, &caption)
+	fmt.Println()
 }
 
 // Returns 'N/A' for empty string
@@ -56,13 +67,13 @@ func normalizeField(field string) string {
 
 // SetCredential is used to add/update the list of credentials
 func (c *Crypt) SetCredential(cred Credential) {
-	key := normalizeName(cred.Service)
+	key := utils.NormalizeString(cred.Service)
 	c.Credentials[key] = cred
 }
 
 // FindCredential finds the Credential struct corresponding to the given service name.
 func (c *Crypt) FindCredential(service string) *Credential {
-	key := normalizeName(service)
+	key := utils.NormalizeString(service)
 	if cred, ok := c.Credentials[key]; ok {
 		return &cred
 	}
@@ -95,7 +106,7 @@ func (c *Crypt) GetJSON() ([]byte, error) {
 
 // IsValid determines if the given service exists the Crypt
 func (c *Crypt) IsValid(service string) bool {
-	key := normalizeName(service)
+	key := utils.NormalizeString(service)
 	_, ok := c.Credentials[key]
 	return ok
 }
@@ -109,8 +120,15 @@ func FromJSON(data []byte) (*Crypt, error) {
 	return &crypt, nil
 }
 
-func normalizeName(name string) string {
-	name = strings.ToLower(name)
-	name = spaces.ReplaceAllString(name, "_")
-	return name
+// GetSuggestions get the closest services to the given input service
+// based on the edit distance of the service name
+func (c *Crypt) GetSuggestions(service string) []string {
+	var suggestions []string
+	for _, v := range c.Credentials {
+		ld := utils.CalculateLevenshteinDistance(service, v.Service)
+		if ld < 5 {
+			suggestions = append(suggestions, v.Service)
+		}
+	}
+	return suggestions
 }

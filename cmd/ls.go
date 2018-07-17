@@ -4,8 +4,10 @@ package cmd
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/spf13/cobra"
+	"github.com/sugatpoudel/crypt/utils"
 )
 
 // lsCmd represents the ls command
@@ -23,9 +25,16 @@ func init() {
 
 func ls(cmd *cobra.Command, args []string) {
 	creds := Store.Crypt.Credentials
-	fmt.Printf("You have %d stored credential(s).\n", len(creds))
 
+	data := make([][]string, len(creds))
+	counter := 0
 	for _, v := range creds {
-		fmt.Printf("\t+ %s\n", v.Service)
+		createdAt := v.GetCreatedAt().Format("Jan _2 2006")
+		data = append(data, []string{strconv.Itoa(counter), v.Service, createdAt})
+		counter++
 	}
+
+	caption := fmt.Sprintf("%d credential(s).", len(creds))
+	utils.PrintTable(data, &caption)
+	fmt.Println()
 }

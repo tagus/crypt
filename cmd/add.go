@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -21,6 +22,7 @@ can be espaced using quotes.`,
 	Args:    serviceIsNew,
 	Example: "add 'Amazon Web Services'",
 	Run:     add,
+	Aliases: []string{"new"},
 }
 
 func init() {
@@ -49,6 +51,8 @@ func add(cmd *cobra.Command, args []string) {
 		Username:    user,
 		Password:    pwd,
 		Description: desc,
+		CreatedAt:   time.Now().Unix(),
+		UpdatedAt:   time.Now().Unix(),
 	}
 
 	fmt.Println()

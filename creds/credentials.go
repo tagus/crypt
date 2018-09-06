@@ -52,9 +52,8 @@ func (c Credential) PrintCredential() {
 		[]string{"Password", "[redacted]"},
 	}
 
-	caption := fmt.Sprintf("%s [%s]", c.Service, c.Description)
-	utils.PrintTable(data, &caption)
-	fmt.Println()
+	utils.PrintTable(data, &c.Service)
+	fmt.Println(c.Description)
 }
 
 // Returns 'N/A' for empty string

@@ -91,6 +91,11 @@ func serviceIsValid(cmd *cobra.Command, args []string) error {
 	if Store.Crypt.IsValid(args[0]) {
 		return nil
 	}
+	suggestions := Store.Crypt.GetSuggestions(args[0])
+	fmt.Println("Invalid Service. Did you mean these instead?")
+	for _, s := range suggestions {
+		fmt.Printf("\t+ %s\n", s)
+	}
 	return fmt.Errorf("invalid service specified")
 }
 

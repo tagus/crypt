@@ -34,7 +34,7 @@ func info(cmd *cobra.Command, args []string) {
 	data := [][]string{
 		[]string{"credentials", strconv.Itoa(len(crypt.Credentials))},
 		[]string{"created at", crypt.GetCreatedAt().Format("Jan _2 2006")},
-		[]string{"created at", crypt.GetUpdatedAt().Format("Jan _2 2006")},
+		[]string{"updated at", crypt.GetUpdatedAt().Format("Jan _2 2006")},
 	}
 
 	fmt.Println(title)

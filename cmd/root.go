@@ -31,6 +31,8 @@ Crypt assumes the existence of a '.cryptfile' in the home directory
 and tries to decrypt it upon initialization. If such file does not
 exists, one will be created.
 
+===================================================================
+
 Development mode offers an alternate path for a sample crypt file.
 It does not prompt for a password. This is meant solely
 for sandboxing. DO NOT STORE ANY CREDENTIALS HERE.`,
@@ -92,9 +94,11 @@ func serviceIsValid(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 	suggestions := Store.Crypt.GetSuggestions(args[0])
-	fmt.Println("Invalid Service. Did you mean these instead?")
-	for _, s := range suggestions {
-		fmt.Printf("\t+ %s\n", s)
+	if len(suggestions) > 0 {
+		fmt.Println("Invalid Service. Did you mean these instead?")
+		for _, s := range suggestions {
+			fmt.Printf("\t+ %s\n", s)
+		}
 	}
 	return fmt.Errorf("invalid service specified")
 }

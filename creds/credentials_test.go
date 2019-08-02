@@ -47,7 +47,7 @@ func TestGetJSON(t *testing.T) {
 }
 
 func TestFindCredential(t *testing.T) {
-	cred := crypt.FindCredential("ebay")
+	cred := crypt.FindCredential("amazon web services")
 	assert.NotNil(t, cred, "Did not retrieve credential")
-	assert.Equal(t, "eBay", cred.Service)
+	assert.Equal(t, "Amazon Web Services", cred.Service)
 }

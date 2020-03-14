@@ -1,4 +1,4 @@
-package cmd
+package cmds
 
 import (
 	"fmt"
@@ -8,8 +8,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"github.com/sugatpoudel/crypt/asker"
-	"github.com/sugatpoudel/crypt/creds"
+	"github.com/sugatpoudel/crypt/internal/asker"
+	"github.com/sugatpoudel/crypt/internal/creds"
 )
 
 // editCmd represents the edit command

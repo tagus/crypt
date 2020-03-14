@@ -1,4 +1,4 @@
-package cmd
+package cmds
 
 import (
 	"errors"
@@ -9,8 +9,8 @@ import (
 	"github.com/fatih/color"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
-	"github.com/sugatpoudel/crypt/asker"
-	"github.com/sugatpoudel/crypt/store"
+	"github.com/sugatpoudel/crypt/internal/asker"
+	"github.com/sugatpoudel/crypt/internal/store"
 )
 
 var (

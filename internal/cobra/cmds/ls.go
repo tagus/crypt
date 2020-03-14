@@ -1,13 +1,13 @@
 // Copyright © 2018 Sugat Poudel <taguspoudel@gmail.com>
 
-package cmd
+package cmds
 
 import (
 	"fmt"
 	"strconv"
 
 	"github.com/spf13/cobra"
-	"github.com/sugatpoudel/crypt/utils"
+	"github.com/sugatpoudel/crypt/internal/utils"
 )
 
 // lsCmd represents the ls command

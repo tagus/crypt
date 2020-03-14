@@ -1,11 +1,11 @@
-package cmd
+package cmds
 
 import (
 	"fmt"
 	"strconv"
 
 	"github.com/spf13/cobra"
-	"github.com/sugatpoudel/crypt/utils"
+	"github.com/sugatpoudel/crypt/internal/utils"
 )
 
 // infoCmd represents the export command
@@ -22,13 +22,13 @@ func init() {
 
 func info(cmd *cobra.Command, args []string) {
 	crypt := Store.Crypt
-	title := ` _______  ______    __   __  _______  _______ 
+	title := ` _______  ______    __   __  _______  _______
 |       ||    _ |  |  | |  ||       ||       |
 |       ||   | ||  |  |_|  ||    _  ||_     _|
-|       ||   |_||_ |       ||   |_| |  |   |  
-|      _||    __  ||_     _||    ___|  |   |  
-|     |_ |   |  | |  |   |  |   |      |   |  
-|_______||___|  |_|  |___|  |___|      |___|  
+|       ||   |_||_ |       ||   |_| |  |   |
+|      _||    __  ||_     _||    ___|  |   |
+|     |_ |   |  | |  |   |  |   |      |   |
+|_______||___|  |_|  |___|  |___|      |___|
 	`
 
 	data := [][]string{

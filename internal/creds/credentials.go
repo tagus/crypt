@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/sugatpoudel/crypt/utils"
+	"github.com/sugatpoudel/crypt/internal/utils"
 )
 
 // Crypt represents contents of a crypt file

@@ -7,7 +7,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/sugatpoudel/crypt/creds"
+	"github.com/sugatpoudel/crypt/internal/creds"
 )
 
 // Crypto defines a simple interface for any struct that can encrypt

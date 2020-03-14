@@ -1,12 +1,11 @@
-package cmd
+package cmds
 
 import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/sugatpoudel/crypt/asker"
-
 	"github.com/spf13/cobra"
+	"github.com/sugatpoudel/crypt/internal/asker"
 )
 
 // exportCmd represents the export command

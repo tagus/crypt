@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/sugatpoudel/crypt/creds"
-	"github.com/sugatpoudel/crypt/secure"
+	"github.com/sugatpoudel/crypt/internal/creds"
+	"github.com/sugatpoudel/crypt/internal/secure"
 )
 
 const perm = 0600

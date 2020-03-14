@@ -6,7 +6,7 @@ import (
 	"crypto/rand"
 	"errors"
 
-	"github.com/sugatpoudel/crypt/creds"
+	"github.com/sugatpoudel/crypt/internal/creds"
 )
 
 // AesCrypto is an AES implementation of a Crypto with key size of 256 bits

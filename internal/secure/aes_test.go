@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/sugatpoudel/crypt/creds"
+	"github.com/sugatpoudel/crypt/internal/creds"
 )
 
 var (

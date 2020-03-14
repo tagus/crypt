@@ -46,7 +46,7 @@ func TestAsker(t *testing.T) {
 	tmp.WriteString("Tagus Leduop\n")
 	tmp.Seek(0, os.SEEK_SET)
 
-	ans, err := asker.Ask("What's your name?\n", nil)
+	ans, err := asker.Ask("What's your name?\n")
 
 	assert.NotEmpty(t, ans)
 	assert.Nil(t, err)

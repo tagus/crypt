@@ -57,16 +57,16 @@ func edit(cmd *cobra.Command, args []string) {
 
 		switch i, _ := strconv.Atoi(strings.Trim(ans, " ")); i {
 		case 1:
-			email, err = asker.Ask("Email: ", nil)
+			email, err = asker.Ask("Email: ")
 			printAndExit(err)
 		case 2:
-			user, err = asker.Ask("Username: ", nil)
+			user, err = asker.Ask("Username: ")
 			printAndExit(err)
 		case 3:
-			pwd, err = asker.AskSecret("Password: ", true, nil)
+			pwd, err = asker.AskSecret("Password: ", true)
 			printAndExit(err)
 		case 4:
-			desc, err = asker.Ask("Description: ", nil)
+			desc, err = asker.Ask("Description: ")
 			printAndExit(err)
 		default:
 			exit = true
@@ -91,7 +91,7 @@ func edit(cmd *cobra.Command, args []string) {
 	cred.PrintCredential()
 
 	msg := color.YellowString("\nDoes this look right? [y/n]")
-	confirm, err := asker.Ask(msg, nil)
+	confirm, err := asker.Ask(msg)
 	if confirm == "y" {
 		Store.Crypt.SetCredential(cred)
 		color.Green("Updated service '%s'", service)

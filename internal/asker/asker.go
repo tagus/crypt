@@ -11,24 +11,28 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
+// Asker is a helper for retrieving user input from the given reader
 type Asker struct {
 	Reader *bufio.Reader
 }
 
+// Validation defines a general validation processor for a given string
 type Validation func(string) error
 
+// DefaultAsker constructs a asker from stdin
 func DefaultAsker() *Asker {
 	return &Asker{bufio.NewReader(os.Stdin)}
 }
 
-func (a *Asker) Ask(question string, validation Validation) (string, error) {
+// Ask retrieves user input from the current Reader
+func (a *Asker) Ask(question string, validations ...Validation) (string, error) {
 	fmt.Printf("%s ", question)
 	ans, err := a.Reader.ReadString('\n')
 	if err != nil {
 		return "", err
 	}
 
-	if validation != nil {
+	for _, validation := range validations {
 		err := validation(ans)
 		if err != nil {
 			return "", err
@@ -38,9 +42,9 @@ func (a *Asker) Ask(question string, validation Validation) (string, error) {
 	return sanitize(ans), nil
 }
 
-// Asks for user input without echoing input back to terminal.
+// AskSecret asks for user input without echoing input back to terminal.
 // Note that this method is only supported through stdin
-func (a *Asker) AskSecret(question string, confirm bool, validation Validation) (string, error) {
+func (a *Asker) AskSecret(question string, confirm bool, validations ...Validation) (string, error) {
 	fmt.Printf("%s ", question)
 	pwd, err := terminal.ReadPassword(0)
 	if err != nil {
@@ -57,12 +61,12 @@ func (a *Asker) AskSecret(question string, confirm bool, validation Validation) 
 		fmt.Printf("\n")
 
 		if !bytes.Equal(pwd, conf) {
-			return "", errors.New("Confirmation did not match.")
+			return "", errors.New("confirmation did not match")
 		}
 	}
 
 	ans := string(pwd)
-	if validation != nil {
+	for _, validation := range validations {
 		err := validation(ans)
 		if err != nil {
 			return "", err

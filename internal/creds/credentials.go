@@ -131,3 +131,8 @@ func (c *Crypt) GetSuggestions(service string) []string {
 	}
 	return suggestions
 }
+
+// Len determines the number of credentials that are part of this crypt
+func (c *Crypt) Len() int {
+	return len(c.Credentials)
+}

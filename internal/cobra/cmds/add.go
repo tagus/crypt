@@ -33,16 +33,16 @@ func add(cmd *cobra.Command, args []string) {
 	service := args[0]
 	asker := asker.DefaultAsker()
 
-	email, err := asker.Ask("Email: ", nil)
+	email, err := asker.Ask("Email: ")
 	printAndExit(err)
 
-	user, err := asker.Ask("Username: ", nil)
+	user, err := asker.Ask("Username: ")
 	printAndExit(err)
 
-	pwd, err := asker.AskSecret("Password: ", true, nil)
+	pwd, err := asker.AskSecret("Password: ", true)
 	printAndExit(err)
 
-	desc, err := asker.Ask("Description: ", nil)
+	desc, err := asker.Ask("Description: ")
 	printAndExit(err)
 
 	cred := creds.Credential{
@@ -59,7 +59,7 @@ func add(cmd *cobra.Command, args []string) {
 	cred.PrintCredential()
 
 	msg := color.YellowString("\nDoes this look right? [y/n]")
-	confirm, err := asker.Ask(msg, nil)
+	confirm, err := asker.Ask(msg)
 	if confirm == "y" {
 		Store.Crypt.SetCredential(cred)
 		color.Green("Added service '%s'", service)

@@ -25,7 +25,7 @@ func init() {
 
 func export(cmd *cobra.Command, args []string) {
 	ak := asker.DefaultAsker()
-	confirm, err := ak.Ask("Are you sure you want to export the cryptfile?", nil)
+	confirm, err := ak.Ask("Are you sure you want to export the cryptfile?")
 	printAndExit(err)
 
 	if confirm == "yes" {

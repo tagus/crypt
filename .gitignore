@@ -1,2 +1,5 @@
 .DS_Store
 tmp
+
+# test cryptfile used in development
+.dev*

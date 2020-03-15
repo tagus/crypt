@@ -18,7 +18,16 @@ var editCmd = &cobra.Command{
 	Short: "Edit fields for the given service",
 	Long: `Edit fields for the given service.
 Similar flow to the add command however, blank
-values are interpreted as a no-op.`,
+values are interpreted as a no-op.
+
+The following are the numerical values for each field
+
+	1. email
+	2. username
+	3. password
+	4. description
+
+`,
 	Args: serviceIsValid,
 	Run:  edit,
 }

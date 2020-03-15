@@ -18,6 +18,8 @@ var (
 	Store *store.CryptStore
 	// Deving signals that current session is for development
 	Deving bool
+	// cryptfile refers to the path of the encrypted cryptfile
+	cryptfile string
 )
 
 var rootCmd = &cobra.Command{
@@ -27,9 +29,13 @@ var rootCmd = &cobra.Command{
 so that you don't have to worry about remembering all of your
 internet accounts.
 
-Crypt assumes the existence of a '.cryptfile' in the home directory
-and tries to decrypt it upon initialization. If such file does not
-exists, one will be created.
+Crypt uses a "cryptfile" to store any credentials securely. This file is
+encrypted such that it cannot be read as plain text. There are a variety
+of mechanisms to specify the crypt file, specified here in decreasing priority.
+
+	1. cryptfile flag
+	2. CRYPTFILE env variable
+	3. ~/.crytpfile
 
 ===================================================================
 
@@ -49,6 +55,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initCrypt)
+	rootCmd.PersistentFlags().StringVarP(&cryptfile, "cryptfile", "c", "", "the cryptfile location")
 	rootCmd.PersistentFlags().BoolVarP(&Deving, "dev", "d", false, "toggle development mode")
 }
 
@@ -60,25 +67,43 @@ func printAndExit(err error) {
 	}
 }
 
+// getCryptfile determines the path of the cryptfile to be used, the cryptfile
+// flag takes priority, falling back to a CRYPTFILE env var, and finally defaulting
+// to a .cryptfile in the current user's home directory
+func getCryptfile() (string, error) {
+	if cryptfile != "" {
+		return cryptfile, nil
+	}
+	home, err := homedir.Dir()
+	if err != nil {
+		return "", err
+	}
+	path, ok := os.LookupEnv("CRYPTFILE")
+	if ok {
+		return path, nil
+	}
+	path = filepath.Join(home, ".cryptfile")
+	return path, nil
+}
+
 func initCrypt() {
-	var pwd string
-	var filename string
+	var (
+		path, pwd string
+		err       error
+	)
+
 	if Deving {
 		pwd = "fakefakefake" // NOTE: development pwd, completely meaningless
-		filename = ".dev_cryptfile"
+		path = ".dev_cryptfile"
 	} else {
+		path, err = getCryptfile()
+		printAndExit(err)
 		asker := asker.DefaultAsker()
 		secret, err := asker.AskSecret(color.YellowString("Password:"), false)
 		printAndExit(err)
-
 		pwd = secret
-		filename = ".cryptfile"
 	}
 
-	home, err := homedir.Dir()
-	printAndExit(err)
-
-	path := filepath.Join(home, filename)
 	store, err := store.InitDefaultStore(path, pwd)
 	printAndExit(err)
 

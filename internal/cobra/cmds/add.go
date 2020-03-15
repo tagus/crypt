@@ -13,7 +13,7 @@ import (
 // addCmd represents the add command
 var addCmd = &cobra.Command{
 	Use:   "add [service]",
-	Short: "Add a sevice to crypt",
+	Short: "Add a service to crypt",
 	Long: `Add a service along with any associated information
 to the crypt store.
 

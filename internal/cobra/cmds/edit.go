@@ -2,14 +2,15 @@ package cmds
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/spf13/cobra"
+	"github.com/manifoldco/promptui"
 	"github.com/sugatpoudel/crypt/internal/asker"
 	"github.com/sugatpoudel/crypt/internal/creds"
+
+	"github.com/spf13/cobra"
 )
 
 // editCmd represents the edit command
@@ -50,34 +51,31 @@ func edit(cmd *cobra.Command, args []string) {
 
 	oldCred := Store.Crypt.FindCredential(service)
 
-	isNumber := func(str string) error {
-		_, err := strconv.Atoi(strings.Trim(str, " \n"))
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-
 	var email, user, pwd, desc string
 	for {
-		ans, err := asker.Ask("What would you like to edit? ", isNumber)
+		prompt := promptui.Select{
+			Label: "What would you like to edit?",
+			Items: []string{"email", "username", "password", "description", "exit"},
+		}
+		n, _, err := prompt.Run()
 		printAndExit(err)
+
 		exit := false
 
-		switch i, _ := strconv.Atoi(strings.Trim(ans, " ")); i {
-		case 1:
+		switch n {
+		case 0:
 			email, err = asker.Ask("Email: ")
 			printAndExit(err)
-		case 2:
+		case 1:
 			user, err = asker.Ask("Username: ")
 			printAndExit(err)
-		case 3:
+		case 2:
 			pwd, err = asker.AskSecret("Password: ", true)
 			printAndExit(err)
-		case 4:
+		case 3:
 			desc, err = asker.Ask("Description: ")
 			printAndExit(err)
-		default:
+		case 4:
 			exit = true
 		}
 

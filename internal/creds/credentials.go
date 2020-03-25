@@ -81,7 +81,8 @@ func (c *Crypt) FindCredential(service string) *Credential {
 
 // RemoveCredential removes the given service from the Store
 func (c *Crypt) RemoveCredential(service string) {
-	delete(c.Credentials, service)
+	key := utils.NormalizeString(service)
+	delete(c.Credentials, key)
 }
 
 // GetCreatedAt retrieves the crypt's creation time

@@ -4,6 +4,7 @@ import (
 	"github.com/atotto/clipboard"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"github.com/sugatpoudel/crypt/internal/utils"
 )
 
 // pwdCmd represents the pwd command
@@ -21,11 +22,11 @@ func init() {
 
 func getPwd(cmd *cobra.Command, args []string) {
 	service := args[0]
-	cred := Store.Crypt.FindCredential(service)
+	cred := getStore().Crypt.FindCredential(service)
 	pwd := cred.Password
 
 	err := clipboard.WriteAll(pwd)
-	printAndExit(err)
+	utils.FatalIf(err)
 
 	color.Green("Password copied to clipboard")
 }

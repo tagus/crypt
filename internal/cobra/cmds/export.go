@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/sugatpoudel/crypt/internal/asker"
+	"github.com/sugatpoudel/crypt/internal/utils"
 )
 
 // exportCmd represents the export command
@@ -24,18 +25,18 @@ func init() {
 }
 
 func export(cmd *cobra.Command, args []string) {
-	ak := asker.DefaultAsker()
-	confirm, err := ak.Ask("Are you sure you want to export the cryptfile?")
-	printAndExit(err)
+	asker := asker.DefaultAsker()
+	ok, err := asker.AskConfirm("Are you sure you want to export the cryptfile?")
+	utils.FatalIf(err)
 
-	if confirm == "yes" {
+	if ok {
 		fmt.Println("exporting cryptfile")
-		data, err := Store.Crypt.GetJSON()
-		printAndExit(err)
+		data, err := getStore().Crypt.GetJSON()
+		utils.FatalIf(err)
 
 		output := args[0]
 		err = ioutil.WriteFile(output, data, 0644)
-		printAndExit(err)
+		utils.FatalIf(err)
 
 		fmt.Println("cryptfile exported to: ", output)
 	}

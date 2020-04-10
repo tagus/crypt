@@ -1,8 +1,6 @@
 package cmds
 
 import (
-	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -10,15 +8,14 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/sugatpoudel/crypt/internal/asker"
+	"github.com/sugatpoudel/crypt/internal/env"
 	"github.com/sugatpoudel/crypt/internal/store"
+	"github.com/sugatpoudel/crypt/internal/utils"
 )
 
 var (
-	// Store is the current crypt store
-	Store *store.CryptStore
-	// Deving signals that current session is for development
-	Deving bool
-	// cryptfile refers to the path of the encrypted cryptfile
+	st        *store.CryptStore
+	deving    bool
 	cryptfile string
 )
 
@@ -29,19 +26,17 @@ var rootCmd = &cobra.Command{
 so that you don't have to worry about remembering all of your
 internet accounts.
 
+Although crypt supports multi word names for a credential, it might be cumbersome
+to retrieve it in the future. Thus, it might be easier to stick to dash separated
+one word names.
+
 Crypt uses a "cryptfile" to store any credentials securely. This file is
 encrypted such that it cannot be read as plain text. There are a variety
 of mechanisms to specify the crypt file, specified here in decreasing priority.
 
 	1. cryptfile flag
 	2. CRYPTFILE env variable
-	3. ~/.crytpfile
-
-===================================================================
-
-Development mode offers an alternate path for a sample crypt file.
-It does not prompt for a password. This is meant solely
-for sandboxing. DO NOT STORE ANY CREDENTIALS HERE.`,
+	3. ~/.crytpfile`,
 	SilenceUsage: true,
 	// SilenceErrors: true,
 }
@@ -54,17 +49,15 @@ func Execute() {
 }
 
 func init() {
+	// TODO: detect if the cryptfile doesn't exist and adjust prompt accordingly
 	cobra.OnInitialize(initCrypt)
 	rootCmd.PersistentFlags().StringVarP(&cryptfile, "cryptfile", "c", "", "the cryptfile location")
-	rootCmd.PersistentFlags().BoolVarP(&Deving, "dev", "d", false, "toggle development mode")
+	rootCmd.PersistentFlags().BoolVarP(&deving, "dev", "d", false, "toggle development mode")
 }
 
-func printAndExit(err error) {
-	if err != nil {
-		// color.RedString(err.Error())
-		fmt.Println(err)
-		os.Exit(1)
-	}
+// getStore is a helper function to retrieve the current crypt store
+func getStore() *store.CryptStore {
+	return st
 }
 
 // getCryptfile determines the path of the cryptfile to be used, the cryptfile
@@ -92,48 +85,26 @@ func initCrypt() {
 		err       error
 	)
 
-	if Deving {
-		pwd = "fakefakefake" // NOTE: development pwd, completely meaningless
+	if deving {
+		// TODO: see if this flag can be disabled in prod.
+		// Note: this sets up a dev cryptfile where the crypt cmd was executed with a
+		// meaningless password. This is meant to help quickly test features without
+		// going through an auth wall. Do not store actual credentials here.
+		env.SetDev(true)
+		pwd = "fakefakefake"
 		path = ".dev_cryptfile"
 	} else {
 		path, err = getCryptfile()
-		printAndExit(err)
+		utils.FatalIf(err)
+
 		asker := asker.DefaultAsker()
-		secret, err := asker.AskSecret(color.YellowString("Password:"), false)
-		printAndExit(err)
+		secret, err := asker.AskSecret(color.YellowString("Password"), false)
+		utils.FatalIf(err)
+
 		pwd = secret
 	}
 
-	store, err := store.InitDefaultStore(path, pwd)
-	printAndExit(err)
-
-	Store = store
-	color.Green("%s\n", "Crypt initialized successfully")
-}
-
-func serviceIsValid(cmd *cobra.Command, args []string) error {
-	if len(args) != 1 {
-		return errors.New("requires exactly one arg")
-	}
-	if Store.Crypt.IsValid(args[0]) {
-		return nil
-	}
-	suggestions := Store.Crypt.GetSuggestions(args[0])
-	if len(suggestions) > 0 {
-		fmt.Println("Invalid Service. Did you mean these instead?")
-		for _, s := range suggestions {
-			fmt.Printf("\t+ %s\n", s)
-		}
-	}
-	return fmt.Errorf("invalid service specified")
-}
-
-func serviceIsNew(cmd *cobra.Command, args []string) error {
-	if len(args) != 1 {
-		return errors.New("requires exactly one arg")
-	}
-	if !Store.Crypt.IsValid(args[0]) {
-		return nil
-	}
-	return fmt.Errorf("service already exists")
+	st, err = store.InitDefaultStore(path, pwd)
+	utils.FatalIf(err)
+	color.Green("Crypt initialized successfully")
 }

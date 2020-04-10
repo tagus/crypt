@@ -60,10 +60,14 @@ func CalculateLevenshteinDistance(a, b string) int {
 }
 
 // PrintTable prints the given table in a formatted table.
-func PrintTable(data [][]string, caption *string) {
+func PrintTable(data [][]string, headers []string, caption string) {
 	table := tablewriter.NewWriter(os.Stdout)
-	if caption != nil {
-		table.SetCaption(true, *caption)
+	table.SetAutoMergeCells(true)
+	if len(headers) > 0 {
+		table.SetHeader(headers)
+	}
+	if caption != "" {
+		table.SetCaption(true, caption)
 	}
 	for _, v := range data {
 		table.Append(v)

@@ -21,7 +21,7 @@ func init() {
 }
 
 func info(cmd *cobra.Command, args []string) {
-	crypt := Store.Crypt
+	crypt := getStore().Crypt
 	title := ` _______  ______    __   __  _______  _______
 |       ||    _ |  |  | |  ||       ||       |
 |       ||   | ||  |  |_|  ||    _  ||_     _|
@@ -38,5 +38,5 @@ func info(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Println(title)
-	utils.PrintTable(data, nil)
+	utils.PrintTable(data, nil, "")
 }

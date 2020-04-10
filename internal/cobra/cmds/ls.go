@@ -24,7 +24,7 @@ func init() {
 }
 
 func ls(cmd *cobra.Command, args []string) {
-	creds := Store.Crypt.Credentials
+	creds := getStore().Crypt.Credentials
 
 	data := make([][]string, len(creds))
 	counter := 0
@@ -34,7 +34,6 @@ func ls(cmd *cobra.Command, args []string) {
 		counter++
 	}
 
-	caption := fmt.Sprintf("%d credential(s).", len(creds))
-	utils.PrintTable(data, &caption)
-	fmt.Println()
+	utils.PrintTable(data, []string{"index", "name", "created at"}, "credentials")
+	fmt.Printf("%d credential(s).\n", len(creds))
 }

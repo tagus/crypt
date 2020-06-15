@@ -61,9 +61,6 @@ func add(cmd *cobra.Command, args []string) {
 	if ok {
 		getStore().Crypt.SetCredential(cred)
 		color.Green("\nAdded service '%s'", service)
+		saveStore()
 	}
-	color.Green("Saving crypt")
-
-	err = getStore().Save()
-	utils.FatalIf(err)
 }

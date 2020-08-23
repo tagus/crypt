@@ -10,7 +10,7 @@ import (
 // FatalIf will panic if the given error is not nil
 func FatalIf(err error) {
 	if err != nil {
-		fmt.Printf("an unexpected error occurred")
+		fmt.Println("an error occurred: ", err)
 		if env.IsDev() {
 			panic(err)
 		}

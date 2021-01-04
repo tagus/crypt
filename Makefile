@@ -3,5 +3,5 @@
 test:
 	go test ./internal/...
 
-build:
+crypt:
 	go build -o crypt ./cmd/crypt/main.go

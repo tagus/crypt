@@ -1,4 +1,4 @@
-package cmds
+package cobracli
 
 import (
 	"fmt"
@@ -13,15 +13,18 @@ var infoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "Information about your crypt file",
 	Long:  `Displays meta information about your crypt file.`,
-	Run:   info,
+	RunE:  info,
 }
 
 func init() {
 	rootCmd.AddCommand(infoCmd)
 }
 
-func info(cmd *cobra.Command, args []string) {
-	crypt := getStore().Crypt
+func info(cmd *cobra.Command, args []string) error {
+	st, err := getStore()
+	if err != nil {
+		return err
+	}
 	title := ` _______  ______    __   __  _______  _______
 |       ||    _ |  |  | |  ||       ||       |
 |       ||   | ||  |  |_|  ||    _  ||_     _|
@@ -32,11 +35,12 @@ func info(cmd *cobra.Command, args []string) {
 	`
 
 	data := [][]string{
-		[]string{"credentials", strconv.Itoa(crypt.Len())},
-		[]string{"created at", crypt.GetCreatedAt().Format("Jan _2 2006")},
-		[]string{"updated at", crypt.GetUpdatedAt().Format("Jan _2 2006")},
+		{"credentials", strconv.Itoa(st.Len())},
+		{"created at", st.GetCreatedAt().Format("Jan _2 2006")},
+		{"updated at", st.GetUpdatedAt().Format("Jan _2 2006")},
 	}
 
 	fmt.Println(title)
 	utils.PrintTable(data, nil, "")
+	return nil
 }

@@ -1,6 +1,7 @@
-package cmds
+package cobracli
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 
@@ -39,6 +40,7 @@ of mechanisms to specify the crypt file, specified here in decreasing priority.
 	3. ~/.crytpfile`,
 	SilenceUsage: true,
 	// SilenceErrors: true,
+	Version: "v0.1.1",
 }
 
 // Execute executes the root cobra command
@@ -49,21 +51,71 @@ func Execute() {
 }
 
 func init() {
-	// TODO: detect if the cryptfile doesn't exist and adjust prompt accordingly
-	cobra.OnInitialize(initCrypt)
 	rootCmd.PersistentFlags().StringVarP(&cryptfile, "cryptfile", "c", "", "the cryptfile location")
 	rootCmd.PersistentFlags().BoolVarP(&deving, "dev", "d", false, "toggle development mode")
+
+	rootCmd.AddCommand(addCmd)
+	rootCmd.AddCommand(deleteCmd)
+	rootCmd.AddCommand(editCmd)
+	rootCmd.AddCommand(exportCmd)
+	rootCmd.AddCommand(lsCmd)
+	rootCmd.AddCommand(newCmd)
+	rootCmd.AddCommand(pwdCmd)
+	rootCmd.AddCommand(showCmd)
 }
 
 // getStore is a helper function to retrieve the current crypt store
-func getStore() *store.CryptStore {
-	return st
+// this method will initialize a crypt store if one does not already exist.
+func getStore() (*store.CryptStore, error) {
+	if st == nil {
+		store, err := initStore()
+		if err != nil {
+			return nil, err
+		}
+		st = store
+	}
+	return st, nil
 }
 
-// getCryptfile determines the path of the cryptfile to be used, the cryptfile
+func initStore() (*store.CryptStore, error) {
+	var (
+		path, pwd string
+		err       error
+	)
+	if deving {
+		// TODO: see if this flag can be disabled in prod.
+		// Note: this sets up a dev cryptfile where the crypt cmd was executed with a
+		// meaningless password. This is meant to help quickly test features without
+		// going through an auth wall. Do not store actual credentials here.
+		env.SetDev(true)
+		pwd = "fakefakefake"
+		path = ".dev_cryptfile"
+	} else {
+		path, err = resolveCryptfilePath()
+		utils.FatalIf(err)
+
+		asker := asker.DefaultAsker()
+		secret, err := asker.AskSecret(color.YellowString("Password"), false)
+		utils.FatalIf(err)
+
+		pwd = secret
+	}
+
+	_, err = os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, errors.New("cryptfile does not exist")
+		}
+		return nil, err
+	}
+
+	return store.InitDefaultStore(path, pwd)
+}
+
+// resolveCryptfilePath determines the path of the cryptfile to be used, the cryptfile
 // flag takes priority, falling back to a CRYPTFILE env var, and finally defaulting
 // to a .cryptfile in the current user's home directory
-func getCryptfile() (string, error) {
+func resolveCryptfilePath() (string, error) {
 	if cryptfile != "" {
 		return cryptfile, nil
 	}
@@ -77,34 +129,4 @@ func getCryptfile() (string, error) {
 	}
 	path = filepath.Join(home, ".cryptfile")
 	return path, nil
-}
-
-func initCrypt() {
-	var (
-		path, pwd string
-		err       error
-	)
-
-	if deving {
-		// TODO: see if this flag can be disabled in prod.
-		// Note: this sets up a dev cryptfile where the crypt cmd was executed with a
-		// meaningless password. This is meant to help quickly test features without
-		// going through an auth wall. Do not store actual credentials here.
-		env.SetDev(true)
-		pwd = "fakefakefake"
-		path = ".dev_cryptfile"
-	} else {
-		path, err = getCryptfile()
-		utils.FatalIf(err)
-
-		asker := asker.DefaultAsker()
-		secret, err := asker.AskSecret(color.YellowString("Password"), false)
-		utils.FatalIf(err)
-
-		pwd = secret
-	}
-
-	st, err = store.InitDefaultStore(path, pwd)
-	utils.FatalIf(err)
-	color.Green("Crypt initialized successfully")
 }

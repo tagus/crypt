@@ -74,3 +74,11 @@ func PrintTable(data [][]string, headers []string, caption string) {
 	}
 	table.Render()
 }
+
+// FallbackStr returns the fallback if the given val is empty
+func FallbackStr(val, fallback string) string {
+	if strings.TrimSpace(val) == "" {
+		return fallback
+	}
+	return val
+}

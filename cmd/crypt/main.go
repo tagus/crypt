@@ -1,7 +1,7 @@
 package main
 
-import "github.com/sugatpoudel/crypt/internal/cobra/cmds"
+import "github.com/sugatpoudel/crypt/internal/cobracli"
 
 func main() {
-	cmds.Execute()
+	cobracli.Execute()
 }

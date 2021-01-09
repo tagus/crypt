@@ -3,24 +3,25 @@ package store
 import (
 	"errors"
 	"io/ioutil"
-	"os"
 	"time"
 
 	"github.com/sugatpoudel/crypt/internal/creds"
 	"github.com/sugatpoudel/crypt/internal/secure"
 )
 
-const perm = 0600
+const (
+	modePerm = 0600
+)
 
 // CryptStore represents a crypt instance stored as a file
 type CryptStore struct {
+	*creds.Crypt
 	path   string
 	crypto secure.Crypto
-	Crypt  *creds.Crypt
 }
 
-// Creates an empty crypt file in the given path.
-func createDefaultCryptFile(path string, crypto secure.Crypto) error {
+// createNewStore creates an empty crypt store in the given path
+func createNewStore(path string, crypto secure.Crypto) (*CryptStore, error) {
 	credMap := make(map[string]creds.Credential)
 	now := time.Now().Unix()
 	crypt := &creds.Crypt{
@@ -31,15 +32,19 @@ func createDefaultCryptFile(path string, crypto secure.Crypto) error {
 
 	enc, err := crypto.Encrypt(crypt)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = ioutil.WriteFile(path, enc, perm)
+	err = ioutil.WriteFile(path, enc, modePerm)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &CryptStore{
+		path:   path,
+		crypto: crypto,
+		Crypt:  crypt,
+	}, nil
 }
 
 // InitDefaultStore initializes a default crypt store using the AES crypto implementation.
@@ -49,12 +54,14 @@ func InitDefaultStore(path, pwd string) (*CryptStore, error) {
 	if err != nil {
 		return nil, err
 	}
+	return createNewStore(path, crypto)
+}
 
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		err := createDefaultCryptFile(path, crypto)
-		if err != nil {
-			return nil, err
-		}
+// Decrypt attempts to decrypt a crypt store at the given path
+func Decrypt(path, pwd string) (*CryptStore, error) {
+	crypto, err := secure.InitAesCrypto(pwd)
+	if err != nil {
+		return nil, err
 	}
 
 	data, err := ioutil.ReadFile(path)
@@ -67,7 +74,11 @@ func InitDefaultStore(path, pwd string) (*CryptStore, error) {
 		return nil, errors.New("password was invalid, decryption failed")
 	}
 
-	store := &CryptStore{path, crypto, crypt}
+	store := &CryptStore{
+		path:   path,
+		crypto: crypto,
+		Crypt:  crypt,
+	}
 	return store, nil
 }
 
@@ -79,7 +90,7 @@ func (s *CryptStore) Save() error {
 		return err
 	}
 
-	err = ioutil.WriteFile(s.path, data, perm)
+	err = ioutil.WriteFile(s.path, data, modePerm)
 	if err != nil {
 		return err
 	}

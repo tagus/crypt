@@ -1,4 +1,4 @@
-package cmds
+package cobracli
 
 import (
 	"fmt"
@@ -16,28 +16,34 @@ var exportCmd = &cobra.Command{
 	Long: `Export will decrypt the current cryptfile and export
 all credentials as plain text. This is purely meant as a convenience
 function and should be used sparingly.`,
-	Run:  export,
+	RunE: export,
 	Args: cobra.ExactArgs(1),
 }
 
-func init() {
-	rootCmd.AddCommand(exportCmd)
-}
-
-func export(cmd *cobra.Command, args []string) {
+func export(cmd *cobra.Command, args []string) error {
 	asker := asker.DefaultAsker()
 	ok, err := asker.AskConfirm("Are you sure you want to export the cryptfile?")
 	utils.FatalIf(err)
 
 	if ok {
+		st, err := getStore()
+		if err != nil {
+			return err
+		}
+
 		fmt.Println("exporting cryptfile")
-		data, err := getStore().Crypt.GetJSON()
-		utils.FatalIf(err)
+		data, err := st.GetJSON()
+		if err != nil {
+			return err
+		}
 
 		output := args[0]
 		err = ioutil.WriteFile(output, data, 0644)
-		utils.FatalIf(err)
+		if err != nil {
+			return err
+		}
 
 		fmt.Println("cryptfile exported to: ", output)
 	}
+	return err
 }

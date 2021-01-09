@@ -47,9 +47,9 @@ func (c *Credential) GetUpdatedAt() time.Time {
 // PrintCredential prints the credentials while redacting the password
 func (c Credential) PrintCredential() {
 	data := [][]string{
-		[]string{"Email", normalizeField(c.Email)},
-		[]string{"Username", normalizeField(c.Username)},
-		[]string{"Password", "[redacted]"},
+		{"email", normalizeField(c.Email)},
+		{"username", normalizeField(c.Username)},
+		{"pwd", "[redacted]"},
 	}
 
 	fmt.Println()

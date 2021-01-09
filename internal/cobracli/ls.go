@@ -1,6 +1,6 @@
 // Copyright © 2018 Sugat Poudel <taguspoudel@gmail.com>
 
-package cmds
+package cobracli
 
 import (
 	"fmt"
@@ -15,16 +15,17 @@ var lsCmd = &cobra.Command{
 	Use:     "ls",
 	Short:   "List stored services",
 	Long:    `Lists the name of all stored service credentials.`,
-	Run:     ls,
+	RunE:    ls,
 	Aliases: []string{"list"},
 }
 
-func init() {
-	rootCmd.AddCommand(lsCmd)
-}
+func ls(cmd *cobra.Command, args []string) error {
+	st, err := getStore()
+	if err != nil {
+		return err
+	}
 
-func ls(cmd *cobra.Command, args []string) {
-	creds := getStore().Crypt.Credentials
+	creds := st.Credentials
 
 	data := make([][]string, len(creds))
 	counter := 0
@@ -36,4 +37,6 @@ func ls(cmd *cobra.Command, args []string) {
 
 	utils.PrintTable(data, []string{"index", "name", "created at"}, "credentials")
 	fmt.Printf("%d credential(s).\n", len(creds))
+
+	return nil
 }

@@ -1,4 +1,4 @@
-package cmds
+package cobracli
 
 import (
 	"time"
@@ -7,7 +7,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/sugatpoudel/crypt/internal/asker"
 	"github.com/sugatpoudel/crypt/internal/creds"
-	"github.com/sugatpoudel/crypt/internal/utils"
 )
 
 // addCmd represents the add command
@@ -21,29 +20,32 @@ Expects a single argument, however multi word services
 can be espaced using quotes.`,
 	Args:    serviceIsNew,
 	Example: "add 'Amazon Web Services'",
-	Run:     add,
-	Aliases: []string{"new"},
+	RunE:    add,
 }
 
-func init() {
-	rootCmd.AddCommand(addCmd)
-}
-
-func add(cmd *cobra.Command, args []string) {
+func add(cmd *cobra.Command, args []string) error {
 	service := args[0]
 	asker := asker.DefaultAsker()
 
 	email, err := asker.Ask("Email")
-	utils.FatalIf(err)
+	if err != nil {
+		return err
+	}
 
 	user, err := asker.Ask("Username")
-	utils.FatalIf(err)
+	if err != nil {
+		return err
+	}
 
 	pwd, err := asker.AskSecret("Password", true)
-	utils.FatalIf(err)
+	if err != nil {
+		return err
+	}
 
 	desc, err := asker.Ask("Description")
-	utils.FatalIf(err)
+	if err != nil {
+		return err
+	}
 
 	cred := creds.Credential{
 		Service:     service,
@@ -59,8 +61,13 @@ func add(cmd *cobra.Command, args []string) {
 
 	ok, err := asker.AskConfirm("Does this look right?")
 	if ok {
-		getStore().Crypt.SetCredential(cred)
+		st, err := getStore()
+		if err != nil {
+			return err
+		}
+		st.Crypt.SetCredential(cred)
 		color.Green("\nAdded service '%s'", service)
-		saveStore()
+		return saveStore()
 	}
+	return nil
 }

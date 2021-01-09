@@ -11,8 +11,8 @@ import (
 // infoCmd represents the export command
 var infoCmd = &cobra.Command{
 	Use:   "info",
-	Short: "Information about your crypt file",
-	Long:  `Displays meta information about your crypt file.`,
+	Short: "information about your crypt file",
+	Long:  `displays meta information about your crypt file.`,
 	RunE:  info,
 }
 
@@ -36,8 +36,8 @@ func info(cmd *cobra.Command, args []string) error {
 
 	data := [][]string{
 		{"credentials", strconv.Itoa(st.Len())},
-		{"created at", st.GetCreatedAt().Format("Jan _2 2006")},
-		{"updated at", st.GetUpdatedAt().Format("Jan _2 2006")},
+		{"created at", st.GetCreatedAt().Format("01/02/2006")},
+		{"updated at", st.GetUpdatedAt().Format("01/02/2006")},
 	}
 
 	fmt.Println(title)

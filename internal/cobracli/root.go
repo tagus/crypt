@@ -22,8 +22,8 @@ var (
 
 var rootCmd = &cobra.Command{
 	Use:   "crypt",
-	Short: "A secure credential store",
-	Long: `Crypt is CLI application to securely store your credentials
+	Short: "a secure credential store",
+	Long: `crypt is CLI application to securely store your credentials
 so that you don't have to worry about remembering all of your
 internet accounts.
 
@@ -95,7 +95,7 @@ func initStore() (*store.CryptStore, error) {
 		utils.FatalIf(err)
 
 		asker := asker.DefaultAsker()
-		secret, err := asker.AskSecret(color.YellowString("Password"), false)
+		secret, err := asker.AskSecret(color.YellowString("pwd"), false)
 		utils.FatalIf(err)
 
 		pwd = secret

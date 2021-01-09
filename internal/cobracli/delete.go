@@ -19,7 +19,7 @@ deleted service cannot be recovered.`,
 
 func delete(cmd *cobra.Command, args []string) error {
 	asker := asker.DefaultAsker()
-	ok, err := asker.AskConfirm("Are you sure you want delete this service?")
+	ok, err := asker.AskConfirm("are you sure you want delete this service?")
 	if err != nil {
 		return err
 	}

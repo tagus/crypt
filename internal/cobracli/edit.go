@@ -19,8 +19,8 @@ var (
 // editCmd represents the edit command
 var editCmd = &cobra.Command{
 	Use:   "edit [service]",
-	Short: "Edit fields for the given service",
-	Long: `Edit fields for the given service.
+	Short: "edit fields for the given service",
+	Long: `edit fields for the given service.
 Similar flow to the add command however, blank
 values are interpreted as a no-op.
 `,
@@ -40,7 +40,7 @@ func edit(cmd *cobra.Command, args []string) error {
 
 	var email, user, pwd, desc string
 	for {
-		n, err := asker.AskSelect("What would you like to edit?", fields)
+		n, err := asker.AskSelect("what would you like to edit?", fields)
 		if err != nil {
 			return err
 		}
@@ -48,22 +48,22 @@ func edit(cmd *cobra.Command, args []string) error {
 		exit := false
 		switch n {
 		case 0:
-			email, err = asker.Ask("Email")
+			email, err = asker.Ask("email")
 			if err != nil {
 				return err
 			}
 		case 1:
-			user, err = asker.Ask("Username")
+			user, err = asker.Ask("username")
 			if err != nil {
 				return err
 			}
 		case 2:
-			pwd, err = asker.AskSecret("Password", true)
+			pwd, err = asker.AskSecret("pwd", true)
 			if err != nil {
 				return err
 			}
 		case 3:
-			desc, err = asker.Ask("Description")
+			desc, err = asker.Ask("description")
 			if err != nil {
 				return err
 			}
@@ -89,12 +89,12 @@ func edit(cmd *cobra.Command, args []string) error {
 	cred.PrintCredential()
 	fmt.Println()
 
-	msg := color.YellowString("Does this look right?")
+	msg := color.YellowString("does this look right?")
 	ok, err := asker.AskConfirm(msg)
 	utils.FatalIf(err)
 	if ok {
 		st.SetCredential(cred)
-		color.Green("Updated service '%s'", service)
+		color.Green("updated service '%s'", service)
 		saveStore()
 	}
 	return nil

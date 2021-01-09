@@ -13,7 +13,7 @@ import (
 var newCmd = &cobra.Command{
 	Use:     "new",
 	Short:   "create new cryptfile",
-	Long:    "Attempts to create a new cryptfile at the resolved path if one does not already exist.",
+	Long:    "attempts to create a new cryptfile at the resolved path if one does not already exist.",
 	RunE:    new,
 	Aliases: []string{"init"},
 }

@@ -15,3 +15,8 @@ func TestCalculatingLevenshteinDistance(t *testing.T) {
 	cost := CalculateLevenshteinDistance("capital one", "capitalone")
 	assert.Equal(t, 1, cost)
 }
+
+func TestFallbackStr(t *testing.T) {
+	assert.Equal(t, "val", FallbackStr("val", "fb"))
+	assert.Equal(t, "fb", FallbackStr("   ", "fb"))
+}

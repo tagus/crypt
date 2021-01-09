@@ -52,7 +52,7 @@ func (c *AesCrypto) Encrypt(crypt *creds.Crypt) ([]byte, error) {
 // Decrypt decrypts the given Crypt using AES
 func (c *AesCrypto) Decrypt(enc []byte) (*creds.Crypt, error) {
 	if len(enc) < aes.BlockSize {
-		return nil, xerrors.New("Encrypted data is too small")
+		return nil, xerrors.New("encrypted data is too small")
 	}
 
 	iv := enc[:aes.BlockSize]

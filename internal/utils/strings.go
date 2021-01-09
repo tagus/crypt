@@ -80,9 +80,11 @@ func PrintTable(data [][]string, opts TableOpts) {
 	table.Render()
 }
 
-// FallbackStr returns the fallback if the given val is empty
+// FallbackStr returns the fallback if the given val is empty otherwise
+// returns the normalized val
 func FallbackStr(val, fallback string) string {
-	if strings.TrimSpace(val) == "" {
+	val = strings.TrimSpace(val)
+	if val == "" {
 		return fallback
 	}
 	return val

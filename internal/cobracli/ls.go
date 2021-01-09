@@ -13,8 +13,8 @@ import (
 // lsCmd represents the ls command
 var lsCmd = &cobra.Command{
 	Use:     "ls",
-	Short:   "List stored services",
-	Long:    `Lists the name of all stored service credentials.`,
+	Short:   "list stored services",
+	Long:    `lists the name of all stored service credentials.`,
 	RunE:    ls,
 	Aliases: []string{"list"},
 }

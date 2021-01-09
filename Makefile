@@ -3,8 +3,13 @@
 test:
 	go test ./internal/...
 
-crypt: cmd/crypt/main.go
+crypt: 
 	go build -o crypt ./cmd/crypt/main.go
+
+install: crypt
+	mv crypt ${GOBIN}/crypt
 
 clean:
 	rm -f crypt
+
+.PHONY: clean crypt test install

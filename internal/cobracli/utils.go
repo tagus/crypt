@@ -24,7 +24,7 @@ func serviceIsValid(cmd *cobra.Command, args []string) error {
 	suggestions := st.Crypt.GetSuggestions(args[0])
 	if len(suggestions) > 0 {
 		// TODO: use selector to select from suggestions
-		fmt.Println("Invalid Service. Did you mean these instead?")
+		fmt.Println("invalid Service. Did you mean these instead?")
 		for _, s := range suggestions {
 			fmt.Printf("\t+ %s\n", s)
 		}

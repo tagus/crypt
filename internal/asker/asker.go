@@ -110,7 +110,7 @@ func (a *Asker) AskSecret(question string, confirm bool, validations ...Validati
 
 	if confirm {
 		reAsk := promptui.Prompt{
-			Label: "Confirm " + question,
+			Label: "confirm " + question,
 			Validate: func(val string) error {
 				if val != res {
 					return xerrors.New("confirmation does not match")

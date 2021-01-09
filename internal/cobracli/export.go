@@ -12,8 +12,8 @@ import (
 // exportCmd represents the export command
 var exportCmd = &cobra.Command{
 	Use:   "export [output]",
-	Short: "Export the cryptfile to plain json",
-	Long: `Export will decrypt the current cryptfile and export
+	Short: "export the cryptfile to plain json",
+	Long: `export will decrypt the current cryptfile and export
 all credentials as plain text. This is purely meant as a convenience
 function and should be used sparingly.`,
 	RunE: export,
@@ -22,7 +22,7 @@ function and should be used sparingly.`,
 
 func export(cmd *cobra.Command, args []string) error {
 	asker := asker.DefaultAsker()
-	ok, err := asker.AskConfirm("Are you sure you want to export the cryptfile?")
+	ok, err := asker.AskConfirm("are you sure you want to export the cryptfile?")
 	utils.FatalIf(err)
 
 	if ok {

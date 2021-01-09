@@ -8,7 +8,6 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/sugatpoudel/crypt/internal/asker"
-	"github.com/sugatpoudel/crypt/internal/env"
 	"github.com/sugatpoudel/crypt/internal/store"
 	"github.com/sugatpoudel/crypt/internal/utils"
 	"golang.org/x/xerrors"
@@ -16,7 +15,6 @@ import (
 
 var (
 	st        *store.CryptStore
-	deving    bool
 	cryptfile string
 )
 
@@ -40,7 +38,7 @@ of mechanisms to specify the crypt file, specified here in decreasing priority.
 	3. ~/.crytpfile`,
 	SilenceUsage: true,
 	// SilenceErrors: true,
-	Version: "v0.1.2",
+	Version: "v0.2.0",
 }
 
 // Execute executes the root cobra command
@@ -52,7 +50,6 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&cryptfile, "cryptfile", "c", "", "the cryptfile location")
-	rootCmd.PersistentFlags().BoolVarP(&deving, "dev", "d", false, "toggle development mode")
 
 	rootCmd.AddCommand(addCmd)
 	rootCmd.AddCommand(deleteCmd)
@@ -78,28 +75,12 @@ func getStore() (*store.CryptStore, error) {
 }
 
 func initStore() (*store.CryptStore, error) {
-	var (
-		path, pwd string
-		err       error
-	)
-	if deving {
-		// TODO: see if this flag can be disabled in prod.
-		// Note: this sets up a dev cryptfile where the crypt cmd was executed with a
-		// meaningless password. This is meant to help quickly test features without
-		// going through an auth wall. Do not store actual credentials here.
-		env.SetDev(true)
-		pwd = "fakefakefake"
-		path = ".dev_cryptfile"
-	} else {
-		path, err = resolveCryptfilePath()
-		utils.FatalIf(err)
+	path, err := resolveCryptfilePath()
+	utils.FatalIf(err)
 
-		asker := asker.DefaultAsker()
-		secret, err := asker.AskSecret(color.YellowString("pwd"), false)
-		utils.FatalIf(err)
-
-		pwd = secret
-	}
+	asker := asker.DefaultAsker()
+	pwd, err := asker.AskSecret(color.YellowString("pwd"), false)
+	utils.FatalIf(err)
 
 	_, err = os.Stat(path)
 	if err != nil {

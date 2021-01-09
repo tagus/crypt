@@ -1,17 +1,18 @@
 package cobracli
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"golang.org/x/xerrors"
 )
 
 // serviceIsValid determines if the given service is part of the current st
 func serviceIsValid(cmd *cobra.Command, args []string) error {
+	// TODO: support multi-word services
 	if len(args) != 1 {
-		return errors.New("requires exactly one arg")
+		return xerrors.New("requires exactly one arg")
 	}
 	st, err := getStore()
 	if err != nil {
@@ -28,13 +29,13 @@ func serviceIsValid(cmd *cobra.Command, args []string) error {
 			fmt.Printf("\t+ %s\n", s)
 		}
 	}
-	return fmt.Errorf("invalid service specified")
+	return xerrors.Errorf("invalid service specified: %s", args[0])
 }
 
 // serviceIsNew ensures that the given service does not already exist
 func serviceIsNew(cmd *cobra.Command, args []string) error {
 	if len(args) != 1 {
-		return errors.New("requires exactly one arg")
+		return xerrors.New("requires exactly one arg")
 	}
 	st, err := getStore()
 	if err != nil {
@@ -43,7 +44,7 @@ func serviceIsNew(cmd *cobra.Command, args []string) error {
 	if !st.Crypt.IsValid(args[0]) {
 		return nil
 	}
-	return fmt.Errorf("service already exists")
+	return xerrors.Errorf("service already exists")
 }
 
 // saveStore persists any current changes to the st to the specified cryptfile

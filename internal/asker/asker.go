@@ -1,11 +1,11 @@
 package asker
 
 import (
-	"errors"
 	"io"
 	"strings"
 
 	"github.com/manifoldco/promptui"
+	"golang.org/x/xerrors"
 )
 
 // Asker is a helper for retrieving user input from the given reader
@@ -113,7 +113,7 @@ func (a *Asker) AskSecret(question string, confirm bool, validations ...Validati
 			Label: "Confirm " + question,
 			Validate: func(val string) error {
 				if val != res {
-					return errors.New("confirmation does not match")
+					return xerrors.New("confirmation does not match")
 				}
 				return nil
 			},

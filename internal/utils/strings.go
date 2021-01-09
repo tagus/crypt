@@ -59,19 +59,24 @@ func CalculateLevenshteinDistance(a, b string) int {
 	return grid[aLen][bLen]
 }
 
+// TableOpts defines options for the table writer
+type TableOpts struct {
+	Headers []string
+	Caption string
+}
+
 // PrintTable prints the given table in a formatted table.
-func PrintTable(data [][]string, headers []string, caption string) {
+func PrintTable(data [][]string, opts TableOpts) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetAutoMergeCells(true)
-	if len(headers) > 0 {
-		table.SetHeader(headers)
+	if len(opts.Headers) > 0 {
+		table.SetHeader(opts.Headers)
 	}
-	if caption != "" {
-		table.SetCaption(true, caption)
+	if opts.Caption != "" {
+		table.SetCaption(true, opts.Caption)
 	}
-	for _, v := range data {
-		table.Append(v)
-	}
+	table.SetAutoMergeCells(false)
+	table.AppendBulk(data)
 	table.Render()
 }
 

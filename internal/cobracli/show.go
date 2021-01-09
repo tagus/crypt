@@ -1,10 +1,9 @@
 package cobracli
 
 import (
-	"fmt"
-
 	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
+	"golang.org/x/xerrors"
 )
 
 // showCmd represents the show command
@@ -27,12 +26,12 @@ func show(cmd *cobra.Command, args []string) error {
 
 	cred := st.FindCredential(service)
 	if cred == nil {
-		return fmt.Errorf("service was not found: %s", service)
+		return xerrors.Errorf("service was not found: %s", service)
 	}
 
 	err = clipboard.WriteAll(cred.Password)
 	if err != nil {
-		return fmt.Errorf("failed to copy pwd")
+		return xerrors.Errorf("failed to copy pwd")
 	}
 
 	cred.PrintCredential()

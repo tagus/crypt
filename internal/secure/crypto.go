@@ -4,10 +4,10 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"errors"
 	"strings"
 
 	"github.com/sugatpoudel/crypt/internal/creds"
+	"golang.org/x/xerrors"
 )
 
 // Crypto defines a simple interface for any struct that can encrypt
@@ -40,7 +40,7 @@ func SignMessage(msg string, key []byte) string {
 func DecodeMessage(msg string, key []byte) (string, error) {
 	args := strings.Split(msg, "-")
 	if len(args) != 2 {
-		return "", errors.New("Invalid message")
+		return "", xerrors.New("Invalid message")
 	}
 
 	mac := hmac.New(sha256.New, key)
@@ -50,5 +50,5 @@ func DecodeMessage(msg string, key []byte) (string, error) {
 	if hmac.Equal(token, []byte(args[1])) {
 		return args[0], nil
 	}
-	return "", errors.New("Invalid token")
+	return "", xerrors.New("Invalid token")
 }

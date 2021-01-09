@@ -1,7 +1,6 @@
 package cobracli
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 
@@ -12,6 +11,7 @@ import (
 	"github.com/sugatpoudel/crypt/internal/env"
 	"github.com/sugatpoudel/crypt/internal/store"
 	"github.com/sugatpoudel/crypt/internal/utils"
+	"golang.org/x/xerrors"
 )
 
 var (
@@ -104,12 +104,12 @@ func initStore() (*store.CryptStore, error) {
 	_, err = os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, errors.New("cryptfile does not exist")
+			return nil, xerrors.New("cryptfile does not exist")
 		}
 		return nil, err
 	}
 
-	return store.InitDefaultStore(path, pwd)
+	return store.Decrypt(path, pwd)
 }
 
 // resolveCryptfilePath determines the path of the cryptfile to be used, the cryptfile

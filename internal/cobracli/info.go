@@ -41,6 +41,6 @@ func info(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println(title)
-	utils.PrintTable(data, nil, "")
+	utils.PrintTable(data, utils.TableOpts{})
 	return nil
 }

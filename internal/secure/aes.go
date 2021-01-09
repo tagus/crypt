@@ -4,9 +4,9 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"errors"
 
 	"github.com/sugatpoudel/crypt/internal/creds"
+	"golang.org/x/xerrors"
 )
 
 // AesCrypto is an AES implementation of a Crypto with key size of 256 bits
@@ -52,7 +52,7 @@ func (c *AesCrypto) Encrypt(crypt *creds.Crypt) ([]byte, error) {
 // Decrypt decrypts the given Crypt using AES
 func (c *AesCrypto) Decrypt(enc []byte) (*creds.Crypt, error) {
 	if len(enc) < aes.BlockSize {
-		return nil, errors.New("Encrypted data is too small")
+		return nil, xerrors.New("Encrypted data is too small")
 	}
 
 	iv := enc[:aes.BlockSize]

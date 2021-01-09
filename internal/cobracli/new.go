@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/sugatpoudel/crypt/internal/asker"
 	"github.com/sugatpoudel/crypt/internal/store"
+	"golang.org/x/xerrors"
 )
 
 // newCmd represents the new command
@@ -38,5 +39,5 @@ func new(cmd *cobra.Command, args []string) error {
 		}
 		return err
 	}
-	return nil
+	return xerrors.New("cryptfile already exists")
 }

@@ -52,9 +52,11 @@ func (c Credential) PrintCredential() {
 		{"pwd", "[redacted]"},
 	}
 
-	fmt.Println()
 	caption := fmt.Sprintf("%s: %s", c.Service, c.Description)
-	utils.PrintTable(data, []string{"field", "value"}, caption)
+	utils.PrintTable(data, utils.TableOpts{
+		Headers: []string{"field", "value"},
+		Caption: caption,
+	})
 }
 
 // Returns 'N/A' for empty string

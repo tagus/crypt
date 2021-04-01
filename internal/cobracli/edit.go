@@ -78,10 +78,10 @@ func edit(cmd *cobra.Command, args []string) error {
 
 	cred := creds.Credential{
 		Service:     oldCred.Service,
-		Email:       utils.FallbackStr(oldCred.Email, email),
-		Username:    utils.FallbackStr(oldCred.Username, user),
-		Password:    utils.FallbackStr(oldCred.Password, pwd),
-		Description: utils.FallbackStr(oldCred.Description, desc),
+		Email:       utils.FallbackStr(email, oldCred.Email),
+		Username:    utils.FallbackStr(user, oldCred.Username),
+		Password:    utils.FallbackStr(pwd, oldCred.Password),
+		Description: utils.FallbackStr(desc, oldCred.Description),
 		CreatedAt:   oldCred.CreatedAt,
 		UpdatedAt:   time.Now().Unix(),
 	}

@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 
 	"github.com/spf13/cobra"
-	"github.com/sugatpoudel/crypt/internal/asker"
-	"github.com/sugatpoudel/crypt/internal/utils"
+	"github.com/tagus/crypt/internal/asker"
+	"github.com/tagus/crypt/internal/utils"
 )
 
 // exportCmd represents the export command

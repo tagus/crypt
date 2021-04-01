@@ -7,9 +7,9 @@ import (
 	"github.com/fatih/color"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
-	"github.com/sugatpoudel/crypt/internal/asker"
-	"github.com/sugatpoudel/crypt/internal/store"
-	"github.com/sugatpoudel/crypt/internal/utils"
+	"github.com/tagus/crypt/internal/asker"
+	"github.com/tagus/crypt/internal/store"
+	"github.com/tagus/crypt/internal/utils"
 	"golang.org/x/xerrors"
 )
 

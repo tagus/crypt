@@ -3,7 +3,7 @@ package cobracli
 import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"github.com/sugatpoudel/crypt/internal/asker"
+	"github.com/tagus/crypt/internal/asker"
 )
 
 // deleteCmd represents the add command

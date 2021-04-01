@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/sugatpoudel/crypt/internal/creds"
-	"github.com/sugatpoudel/crypt/internal/secure"
+	"github.com/tagus/crypt/internal/creds"
+	"github.com/tagus/crypt/internal/secure"
 	"golang.org/x/xerrors"
 )
 

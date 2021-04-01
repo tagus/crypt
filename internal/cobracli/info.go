@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/spf13/cobra"
-	"github.com/sugatpoudel/crypt/internal/utils"
+	"github.com/tagus/crypt/internal/utils"
 )
 
 // infoCmd represents the export command

@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/sugatpoudel/crypt/internal/asker"
-	"github.com/sugatpoudel/crypt/internal/creds"
-	"github.com/sugatpoudel/crypt/internal/utils"
+	"github.com/tagus/crypt/internal/asker"
+	"github.com/tagus/crypt/internal/creds"
+	"github.com/tagus/crypt/internal/utils"
 
 	"github.com/spf13/cobra"
 )

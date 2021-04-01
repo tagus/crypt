@@ -1,4 +1,4 @@
-module github.com/sugatpoudel/crypt
+module github.com/tagus/crypt
 
 go 1.15
 

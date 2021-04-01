@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"strings"
 
-	"github.com/sugatpoudel/crypt/internal/creds"
+	"github.com/tagus/crypt/internal/creds"
 	"golang.org/x/xerrors"
 )
 

@@ -4,8 +4,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/sugatpoudel/crypt/internal/asker"
-	"github.com/sugatpoudel/crypt/internal/store"
+	"github.com/tagus/crypt/internal/asker"
+	"github.com/tagus/crypt/internal/store"
 	"golang.org/x/xerrors"
 )
 

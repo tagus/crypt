@@ -69,5 +69,8 @@ func add(cmd *cobra.Command, args []string) error {
 		color.Green("\nadded service '%s'", service)
 		return saveStore()
 	}
+	if err != nil {
+		return err
+	}
 	return nil
 }

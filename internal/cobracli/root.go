@@ -38,7 +38,7 @@ of mechanisms to specify the crypt file, specified here in decreasing priority.
 	3. ~/.crytpfile`,
 	SilenceUsage: true,
 	// SilenceErrors: true,
-	Version: "v0.2.1",
+	Version: "v0.2.2",
 }
 
 // Execute executes the root cobra command

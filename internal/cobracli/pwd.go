@@ -4,6 +4,7 @@ import (
 	"github.com/atotto/clipboard"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"github.com/tagus/crypt/internal/finder"
 )
 
 // pwdCmd represents the pwd command
@@ -22,7 +23,8 @@ func getPwd(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	cred := st.FindCredential(service)
+	fd := finder.New(st.Crypt)
+	cred := fd.Find(service)
 	pwd := cred.Password
 
 	err = clipboard.WriteAll(pwd)

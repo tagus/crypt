@@ -47,7 +47,7 @@ func add(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	cred := creds.Credential{
+	cred := &creds.Credential{
 		Service:     service,
 		Email:       email,
 		Username:    user,
@@ -57,7 +57,7 @@ func add(cmd *cobra.Command, args []string) error {
 		UpdatedAt:   time.Now().Unix(),
 	}
 
-	cred.PrintCredential()
+	creds.PrintCredential(cred)
 
 	ok, err := asker.AskConfirm("does this look right?")
 	if ok {
@@ -65,7 +65,10 @@ func add(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		st.Crypt.SetCredential(cred)
+		_, err = st.Crypt.SetCredential(cred)
+		if err != nil {
+			return err
+		}
 		color.Green("\nadded service '%s'", service)
 		return saveStore()
 	}

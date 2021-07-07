@@ -3,6 +3,8 @@ package cobracli
 import (
 	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
+	"github.com/tagus/crypt/internal/creds"
+	"github.com/tagus/crypt/internal/finder"
 	"golang.org/x/xerrors"
 )
 
@@ -24,16 +26,14 @@ func show(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	cred := st.FindCredential(service)
-	if cred == nil {
-		return xerrors.Errorf("service was not found: %s", service)
-	}
+	fd := finder.New(st.Crypt)
+	cred := fd.Find(service)
 
 	err = clipboard.WriteAll(cred.Password)
 	if err != nil {
 		return xerrors.Errorf("failed to copy pwd")
 	}
 
-	cred.PrintCredential()
+	creds.PrintCredential(cred)
 	return nil
 }

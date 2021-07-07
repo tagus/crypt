@@ -9,14 +9,14 @@ import (
 )
 
 var (
-	ebay = creds.Credential{
+	ebay = &creds.Credential{
 		Service:     "eBay",
 		Description: "electronic auction bay",
 		Username:    "beanie_babies123",
 		Password:    "mars321",
 	}
 	crypt = &creds.Crypt{
-		Credentials: map[string]creds.Credential{
+		Credentials: map[string]*creds.Credential{
 			"ebay": ebay,
 		},
 		CreatedAt: time.Now().Unix(),

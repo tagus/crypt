@@ -7,6 +7,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/tagus/crypt/internal/asker"
 	"github.com/tagus/crypt/internal/creds"
+	"github.com/tagus/crypt/internal/finder"
 	"github.com/tagus/crypt/internal/utils"
 
 	"github.com/spf13/cobra"
@@ -36,7 +37,8 @@ func edit(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	oldCred := st.FindCredential(service)
+	fd := finder.New(st.Crypt)
+	oldCred := fd.Find(service)
 
 	var email, user, pwd, desc string
 	for {
@@ -76,7 +78,7 @@ func edit(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	cred := creds.Credential{
+	cred := &creds.Credential{
 		Service:     oldCred.Service,
 		Email:       utils.FallbackStr(email, oldCred.Email),
 		Username:    utils.FallbackStr(user, oldCred.Username),
@@ -86,14 +88,17 @@ func edit(cmd *cobra.Command, args []string) error {
 		UpdatedAt:   time.Now().Unix(),
 	}
 
-	cred.PrintCredential()
+	creds.PrintCredential(cred)
 	fmt.Println()
 
 	msg := color.YellowString("does this look right?")
 	ok, err := asker.AskConfirm(msg)
 	utils.FatalIf(err)
 	if ok {
-		st.SetCredential(cred)
+		_, err := st.SetCredential(cred)
+		if err != nil {
+			return err
+		}
 		color.Green("updated service '%s'", service)
 		saveStore()
 	}

@@ -22,18 +22,10 @@ type CryptStore struct {
 }
 
 // createNewStore creates an empty crypt store in the given path
-func createNewStore(path string, crypto secure.Crypto) (*CryptStore, error) {
+func createNewStore(path string, crypto secure.Crypto, crypt *creds.Crypt) (*CryptStore, error) {
 	_, err := os.Stat(path)
 	if err == nil {
 		return nil, xerrors.New("cryptfile already exists 😬")
-	}
-
-	credMap := make(map[string]creds.Credential)
-	now := time.Now().Unix()
-	crypt := &creds.Crypt{
-		Credentials: credMap,
-		CreatedAt:   now,
-		UpdatedAt:   now,
 	}
 
 	enc, err := crypto.Encrypt(crypt)
@@ -53,14 +45,15 @@ func createNewStore(path string, crypto secure.Crypto) (*CryptStore, error) {
 	}, nil
 }
 
-// InitDefaultStore initializes a default crypt store using the AES crypto implementation.
-// If the crypt file does not exist, one will be created in the provided path.
-func InitDefaultStore(path, pwd string) (*CryptStore, error) {
+// InitDefaultStore initializes a defualt crypt store with the given crypt struct
+// using the AES crypto implementation. If the crypt file does not exist, one will
+// be created in the provided path.
+func InitDefaultStore(path, pwd string, crypt *creds.Crypt) (*CryptStore, error) {
 	crypto, err := secure.InitAesCrypto(pwd)
 	if err != nil {
 		return nil, err
 	}
-	return createNewStore(path, crypto)
+	return createNewStore(path, crypto, crypt)
 }
 
 // Decrypt attempts to decrypt a crypt store at the given path

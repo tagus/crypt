@@ -1,10 +1,9 @@
 package cobracli
 
 import (
-	"fmt"
-
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"github.com/tagus/crypt/internal/finder"
 	"golang.org/x/xerrors"
 )
 
@@ -18,16 +17,10 @@ func serviceIsValid(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	if st.Crypt.IsValid(args[0]) {
+	fd := finder.New(st.Crypt)
+	cred := fd.Find(args[0])
+	if cred != nil {
 		return nil
-	}
-	suggestions := st.Crypt.GetSuggestions(args[0])
-	if len(suggestions) > 0 {
-		// TODO: use selector to select from suggestions
-		fmt.Println("invalid Service. Did you mean these instead?")
-		for _, s := range suggestions {
-			fmt.Printf("\t+ %s\n", s)
-		}
 	}
 	return xerrors.Errorf("invalid service specified: %s", args[0])
 }
@@ -41,7 +34,9 @@ func serviceIsNew(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	if !st.Crypt.IsValid(args[0]) {
+	fd := finder.New(st.Crypt)
+	cred := fd.Find(args[0])
+	if cred == nil {
 		return nil
 	}
 	return xerrors.Errorf("service already exists")

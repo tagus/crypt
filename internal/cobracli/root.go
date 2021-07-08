@@ -8,6 +8,7 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/asker"
+	"github.com/tagus/crypt/internal/creds"
 	"github.com/tagus/crypt/internal/store"
 	"github.com/tagus/crypt/internal/utils"
 	"golang.org/x/xerrors"
@@ -15,6 +16,7 @@ import (
 
 var (
 	st        *store.CryptStore
+	svc       *creds.Credential
 	cryptfile string
 )
 
@@ -38,7 +40,7 @@ of mechanisms to specify the crypt file, specified here in decreasing priority.
 	3. ~/.crytpfile`,
 	SilenceUsage: true,
 	// SilenceErrors: true,
-	Version: "v1.0",
+	Version: "v1.1",
 }
 
 // Execute executes the root cobra command
@@ -61,17 +63,23 @@ func init() {
 	rootCmd.AddCommand(showCmd)
 }
 
-// getStore is a helper function to retrieve the current crypt store
-// this method will initialize a crypt store if one does not already exist.
-func getStore() (*store.CryptStore, error) {
-	if st == nil {
-		store, err := initStore()
-		if err != nil {
-			return nil, err
-		}
-		st = store
+// resolveCryptfilePath determines the path of the cryptfile to be used, the cryptfile
+// flag takes priority, falling back to a CRYPTFILE env var, and finally defaulting
+// to a .cryptfile in the current user's home directory
+func resolveCryptfilePath() (string, error) {
+	if cryptfile != "" {
+		return cryptfile, nil
 	}
-	return st, nil
+	home, err := homedir.Dir()
+	if err != nil {
+		return "", err
+	}
+	path, ok := os.LookupEnv("CRYPTFILE")
+	if ok {
+		return path, nil
+	}
+	path = filepath.Join(home, ".cryptfile")
+	return path, nil
 }
 
 func initStore() (*store.CryptStore, error) {
@@ -93,21 +101,30 @@ func initStore() (*store.CryptStore, error) {
 	return store.Decrypt(path, pwd)
 }
 
-// resolveCryptfilePath determines the path of the cryptfile to be used, the cryptfile
-// flag takes priority, falling back to a CRYPTFILE env var, and finally defaulting
-// to a .cryptfile in the current user's home directory
-func resolveCryptfilePath() (string, error) {
-	if cryptfile != "" {
-		return cryptfile, nil
+// getStore is a helper function to retrieve the current crypt store
+// this method will initialize a crypt store if one does not already exist.
+func getStore() (*store.CryptStore, error) {
+	if st == nil {
+		store, err := initStore()
+		if err != nil {
+			return nil, err
+		}
+		st = store
 	}
-	home, err := homedir.Dir()
-	if err != nil {
-		return "", err
+	return st, nil
+}
+
+func setService(service *creds.Credential) error {
+	if svc != nil {
+		return xerrors.New("service already set")
 	}
-	path, ok := os.LookupEnv("CRYPTFILE")
-	if ok {
-		return path, nil
+	svc = service
+	return nil
+}
+
+func getService() (*creds.Credential, error) {
+	if svc == nil {
+		return nil, xerrors.New("no service set")
 	}
-	path = filepath.Join(home, ".cryptfile")
-	return path, nil
+	return svc, nil
 }

@@ -12,12 +12,18 @@ import (
 )
 
 type Finder struct {
-	crypt *creds.Crypt
+	crypt    *creds.Crypt
+	services []string
 }
 
 func New(crypt *creds.Crypt) *Finder {
+	services := make([]string, 0, len(crypt.Credentials))
+	for _, cred := range crypt.Credentials {
+		services = append(services, cred.Service)
+	}
 	return &Finder{
-		crypt: crypt,
+		crypt:    crypt,
+		services: services,
 	}
 }
 

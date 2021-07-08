@@ -12,7 +12,7 @@ var deleteCmd = &cobra.Command{
 	Short: "delete the given service from crypt",
 	Long: `Delete a service from the crypt getStore(). Note that the
 deleted service cannot be recovered.`,
-	Args:    serviceIsValid,
+	Args:    parseService,
 	RunE:    delete,
 	Aliases: []string{"del", "remove"},
 }
@@ -24,13 +24,17 @@ func delete(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	if ok {
-		service := args[0]
+		svc, err := getService()
+		if err != nil {
+			return err
+		}
+
 		st, err := getStore()
 		if err != nil {
 			return err
 		}
-		st.RemoveCredential(service)
-		color.Blue("successfully deleted: %s", service)
+		st.RemoveCredential(svc.Id)
+		color.Blue("successfully deleted: %s", svc.Service)
 		saveStore()
 	}
 	return nil

@@ -79,13 +79,3 @@ func PrintTable(data [][]string, opts TableOpts) {
 	table.AppendBulk(data)
 	table.Render()
 }
-
-// FallbackStr returns the fallback if the given val is empty otherwise
-// returns the normalized val
-func FallbackStr(val, fallback string) string {
-	val = strings.TrimSpace(val)
-	if val == "" {
-		return fallback
-	}
-	return val
-}

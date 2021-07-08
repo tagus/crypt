@@ -31,10 +31,19 @@ Each service is stored as a `credential` with the given structure.
 
 ```
 credential {
+  id: string
   service: string
+  domains: string[]
   email: string
   username: string
   password: string
   description: string
+  tags: string[]
+  created_at: int
+  updated_at: int
+  details: {
+    key: string
+    value: string
+  }[]
 }
 ```

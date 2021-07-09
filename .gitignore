@@ -7,4 +7,5 @@ tmp
 
 # outputs
 crypt
+!crypt/
 out.json

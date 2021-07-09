@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/asker"
-	"github.com/tagus/crypt/internal/creds"
+	"github.com/tagus/crypt/internal/crypt"
 	"github.com/tagus/crypt/internal/store"
 	"golang.org/x/xerrors"
 )
@@ -57,11 +57,11 @@ func new(cmd *cobra.Command, args []string) error {
 	return xerrors.New("cryptfile already exists")
 }
 
-func buildCrypt() (*creds.Crypt, error) {
+func buildCrypt() (*crypt.Crypt, error) {
 	if seedFile == "" {
-		credMap := make(map[string]*creds.Credential)
+		credMap := make(map[string]*crypt.Credential)
 		now := time.Now().Unix()
-		return &creds.Crypt{
+		return &crypt.Crypt{
 			Credentials: credMap,
 			CreatedAt:   now,
 			UpdatedAt:   now,
@@ -72,5 +72,5 @@ func buildCrypt() (*creds.Crypt, error) {
 	if err != nil {
 		return nil, err
 	}
-	return creds.FromJSON(buf)
+	return crypt.FromJSON(buf)
 }

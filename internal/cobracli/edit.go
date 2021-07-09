@@ -5,7 +5,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/tagus/crypt/internal/asker"
-	"github.com/tagus/crypt/internal/creds"
+	"github.com/tagus/crypt/internal/crypt"
 	"github.com/tagus/crypt/internal/utils"
 
 	"github.com/spf13/cobra"
@@ -34,7 +34,7 @@ func edit(cmd *cobra.Command, args []string) error {
 	}
 
 	asker := asker.DefaultAsker()
-	updated := &creds.Credential{Service: svc.Service}
+	updated := &crypt.Credential{Service: svc.Service}
 	for {
 		n, err := asker.AskSelect("what would you like to edit?", fields)
 		if err != nil {
@@ -72,7 +72,7 @@ func edit(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	creds.PrintCredential(updated)
+	crypt.PrintCredential(updated)
 	fmt.Println()
 
 	msg := color.YellowString("do these updated values make sense?")

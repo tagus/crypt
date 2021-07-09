@@ -1,4 +1,4 @@
-package creds
+package crypt
 
 import (
 	"fmt"

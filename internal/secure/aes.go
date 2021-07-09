@@ -5,7 +5,7 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 
-	"github.com/tagus/crypt/internal/creds"
+	"github.com/tagus/crypt/internal/crypt"
 	"golang.org/x/xerrors"
 )
 
@@ -30,7 +30,7 @@ func InitAesCrypto(pwd string) (*AesCrypto, error) {
 }
 
 // Encrypt encrypts the given Crypt using AES
-func (c *AesCrypto) Encrypt(crypt *creds.Crypt) ([]byte, error) {
+func (c *AesCrypto) Encrypt(crypt *crypt.Crypt) ([]byte, error) {
 	data, err := crypt.GetJSON()
 	if err != nil {
 		return nil, err
@@ -50,7 +50,7 @@ func (c *AesCrypto) Encrypt(crypt *creds.Crypt) ([]byte, error) {
 }
 
 // Decrypt decrypts the given Crypt using AES
-func (c *AesCrypto) Decrypt(enc []byte) (*creds.Crypt, error) {
+func (c *AesCrypto) Decrypt(enc []byte) (*crypt.Crypt, error) {
 	if len(enc) < aes.BlockSize {
 		return nil, xerrors.New("encrypted data is too small")
 	}
@@ -61,10 +61,10 @@ func (c *AesCrypto) Decrypt(enc []byte) (*creds.Crypt, error) {
 	stream := cipher.NewCFBDecrypter(c.block, iv)
 	stream.XORKeyStream(dec, dec)
 
-	crypt, err := creds.FromJSON(dec)
+	cr, err := crypt.FromJSON(dec)
 	if err != nil {
 		return nil, err
 	}
 
-	return crypt, nil
+	return cr, nil
 }

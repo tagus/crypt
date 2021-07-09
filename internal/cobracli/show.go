@@ -3,7 +3,7 @@ package cobracli
 import (
 	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
-	"github.com/tagus/crypt/internal/creds"
+	"github.com/tagus/crypt/internal/crypt"
 	"golang.org/x/xerrors"
 )
 
@@ -28,6 +28,6 @@ func show(cmd *cobra.Command, args []string) error {
 		return xerrors.Errorf("failed to copy pwd")
 	}
 
-	creds.PrintCredential(svc)
+	crypt.PrintCredential(svc)
 	return nil
 }

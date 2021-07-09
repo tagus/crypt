@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/tagus/crypt/internal/creds"
+	"github.com/tagus/crypt/internal/crypt"
 	"github.com/tagus/crypt/internal/secure"
 	"golang.org/x/xerrors"
 )
@@ -16,19 +16,19 @@ const (
 
 // CryptStore represents a crypt instance stored as a file
 type CryptStore struct {
-	*creds.Crypt
+	*crypt.Crypt
 	path   string
 	crypto secure.Crypto
 }
 
 // createNewStore creates an empty crypt store in the given path
-func createNewStore(path string, crypto secure.Crypto, crypt *creds.Crypt) (*CryptStore, error) {
+func createNewStore(path string, crypto secure.Crypto, cr *crypt.Crypt) (*CryptStore, error) {
 	_, err := os.Stat(path)
 	if err == nil {
 		return nil, xerrors.New("cryptfile already exists 😬")
 	}
 
-	enc, err := crypto.Encrypt(crypt)
+	enc, err := crypto.Encrypt(cr)
 	if err != nil {
 		return nil, err
 	}
@@ -41,14 +41,14 @@ func createNewStore(path string, crypto secure.Crypto, crypt *creds.Crypt) (*Cry
 	return &CryptStore{
 		path:   path,
 		crypto: crypto,
-		Crypt:  crypt,
+		Crypt:  cr,
 	}, nil
 }
 
 // InitDefaultStore initializes a defualt crypt store with the given crypt struct
 // using the AES crypto implementation. If the crypt file does not exist, one will
 // be created in the provided path.
-func InitDefaultStore(path, pwd string, crypt *creds.Crypt) (*CryptStore, error) {
+func InitDefaultStore(path, pwd string, crypt *crypt.Crypt) (*CryptStore, error) {
 	crypto, err := secure.InitAesCrypto(pwd)
 	if err != nil {
 		return nil, err
@@ -83,13 +83,17 @@ func Decrypt(path, pwd string) (*CryptStore, error) {
 
 // Save encrypts the current Crypt and saves it to the path field.
 func (s *CryptStore) Save() error {
+	return s.SaveTo(s.path)
+}
+
+func (s *CryptStore) SaveTo(path string) error {
 	s.UpdatedAt = time.Now().Unix()
 	data, err := s.crypto.Encrypt(s.Crypt)
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(s.path, data, modePerm)
+	err = ioutil.WriteFile(path, data, modePerm)
 	if err != nil {
 		return err
 	}

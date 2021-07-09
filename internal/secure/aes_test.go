@@ -5,18 +5,18 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tagus/crypt/internal/creds"
+	"github.com/tagus/crypt/internal/crypt"
 )
 
 var (
-	ebay = &creds.Credential{
+	ebay = &crypt.Credential{
 		Service:     "eBay",
 		Description: "electronic auction bay",
 		Username:    "beanie_babies123",
 		Password:    "mars321",
 	}
-	crypt = &creds.Crypt{
-		Credentials: map[string]*creds.Credential{
+	cr = &crypt.Crypt{
+		Credentials: map[string]*crypt.Credential{
 			"ebay": ebay,
 		},
 		CreatedAt: time.Now().Unix(),
@@ -31,14 +31,14 @@ func TestAesCryptoInit(t *testing.T) {
 
 func TestEncryption(t *testing.T) {
 	aes, _ := InitAesCrypto("secret100")
-	_, err := aes.Encrypt(crypt)
+	_, err := aes.Encrypt(cr)
 	assert.Nil(t, err, "Encryption failed")
 }
 
 func TestDecryption(t *testing.T) {
 	aes, _ := InitAesCrypto("secret100")
-	enc, _ := aes.Encrypt(crypt)
+	enc, _ := aes.Encrypt(cr)
 	dec, err := aes.Decrypt(enc)
 	assert.Nil(t, err, "Decryption failed")
-	assert.Equal(t, crypt, dec, "Decryption was incorrect")
+	assert.Equal(t, cr, dec, "Decryption was incorrect")
 }

@@ -6,7 +6,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/asker"
-	"github.com/tagus/crypt/internal/creds"
+	"github.com/tagus/crypt/internal/crypt"
 )
 
 // addCmd represents the add command
@@ -47,7 +47,7 @@ func add(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	cred := &creds.Credential{
+	cred := &crypt.Credential{
 		Service:     service,
 		Email:       email,
 		Username:    user,
@@ -57,7 +57,7 @@ func add(cmd *cobra.Command, args []string) error {
 		UpdatedAt:   time.Now().Unix(),
 	}
 
-	creds.PrintCredential(cred)
+	crypt.PrintCredential(cred)
 
 	ok, err := asker.AskConfirm("does this look right?")
 	if ok {

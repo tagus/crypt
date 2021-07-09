@@ -6,15 +6,15 @@ import (
 	"encoding/hex"
 	"strings"
 
-	"github.com/tagus/crypt/internal/creds"
+	"github.com/tagus/crypt/internal/crypt"
 	"golang.org/x/xerrors"
 )
 
 // Crypto defines a simple interface for any struct that can encrypt
 // and decrypt crypt data.
 type Crypto interface {
-	Encrypt(crypt *creds.Crypt) ([]byte, error)
-	Decrypt(cipher []byte) (*creds.Crypt, error)
+	Encrypt(crypt *crypt.Crypt) ([]byte, error)
+	Decrypt(cipher []byte) (*crypt.Crypt, error)
 }
 
 // Computes an SHA 256 bit given the key string.

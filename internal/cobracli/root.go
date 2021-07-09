@@ -8,7 +8,7 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/asker"
-	"github.com/tagus/crypt/internal/creds"
+	"github.com/tagus/crypt/internal/crypt"
 	"github.com/tagus/crypt/internal/store"
 	"github.com/tagus/crypt/internal/utils"
 	"golang.org/x/xerrors"
@@ -16,7 +16,7 @@ import (
 
 var (
 	st        *store.CryptStore
-	svc       *creds.Credential
+	svc       *crypt.Credential
 	cryptfile string
 )
 
@@ -40,7 +40,7 @@ of mechanisms to specify the crypt file, specified here in decreasing priority.
 	3. ~/.crytpfile`,
 	SilenceUsage: true,
 	// SilenceErrors: true,
-	Version: "v1.2",
+	Version: crypt.Version,
 }
 
 // Execute executes the root cobra command
@@ -114,7 +114,7 @@ func getStore() (*store.CryptStore, error) {
 	return st, nil
 }
 
-func setService(service *creds.Credential) error {
+func setService(service *crypt.Credential) error {
 	if svc != nil {
 		return xerrors.New("service already set")
 	}
@@ -122,7 +122,7 @@ func setService(service *creds.Credential) error {
 	return nil
 }
 
-func getService() (*creds.Credential, error) {
+func getService() (*crypt.Credential, error) {
 	if svc == nil {
 		return nil, xerrors.New("no service set")
 	}

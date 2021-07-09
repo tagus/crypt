@@ -33,13 +33,8 @@ func edit(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	st, err := getStore()
-	if err != nil {
-		return err
-	}
-
 	asker := asker.DefaultAsker()
-	updated := &creds.Credential{}
+	updated := &creds.Credential{Service: svc.Service}
 	for {
 		n, err := asker.AskSelect("what would you like to edit?", fields)
 		if err != nil {
@@ -84,11 +79,8 @@ func edit(cmd *cobra.Command, args []string) error {
 	ok, err := asker.AskConfirm(msg)
 	utils.FatalIf(err)
 	if ok {
-		_, err := st.SetCredential(svc.Merge(updated))
-		if err != nil {
-			return err
-		}
-		color.Green("updated service '%s'", updated.Service)
+		svc.Merge(updated)
+		color.Green("updated service '%s'", svc.Service)
 		saveStore()
 	}
 	return nil

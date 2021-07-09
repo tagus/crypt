@@ -64,7 +64,7 @@ func serviceIsNew(cmd *cobra.Command, args []string) error {
 
 // saveStore persists any current changes to the st to the specified cryptfile
 func saveStore() error {
-	color.Green("\nSaving crypt")
+	color.Green("saving crypt")
 	st, err := getStore()
 	if err != nil {
 		return err

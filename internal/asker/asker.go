@@ -84,6 +84,8 @@ func (a *Asker) AskConfirm(question string) (bool, error) {
 		fallthrough
 	case "yup":
 		fallthrough
+	case "ok":
+		fallthrough
 	case "yes":
 		return true, nil
 	default:

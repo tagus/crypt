@@ -12,7 +12,8 @@ func PrintCredential(cred *Credential) {
 		{"id", cred.Id},
 		{"email", normalizeField(cred.Email)},
 		{"username", normalizeField(cred.Username)},
-		{"pwd", "[redacted]"},
+		{"pwd", "// redacted //"},
+		{"tags", fmt.Sprintf("%v", cred.Tags)},
 	}
 
 	caption := fmt.Sprintf("%s: %s", cred.Service, cred.Description)

@@ -26,6 +26,9 @@ The hash will be computed from a password that the user provides.
 8. `new` creates a new `cryptfile`
 9. `pwd` copies the pwd of the specified service in your clipboard
 
+The `--help` flag can be used in conjunction with any command to get more details
+about usage and optional flags.
+
 ## Structure
 Each service is stored as a `credential` with the given structure.
 

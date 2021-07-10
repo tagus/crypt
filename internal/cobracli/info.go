@@ -35,6 +35,7 @@ func info(cmd *cobra.Command, args []string) error {
 	`
 
 	data := [][]string{
+		{"id", st.Crypt.Id},
 		{"credentials", strconv.Itoa(st.Len())},
 		{"created at", st.GetCreatedAt().Format("01/02/2006")},
 		{"updated at", st.GetUpdatedAt().Format("01/02/2006")},

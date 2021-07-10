@@ -8,10 +8,11 @@ import (
 )
 
 // Version represents the current version of the cryptfile + cli
-const Version = "v1.4"
+const Version = "v1.5"
 
 // Crypt represents contents of a crypt file
 type Crypt struct {
+	Id          string                 `json:"id"`
 	Credentials map[string]*Credential `json:"credentials"`
 	UpdatedAt   int64                  `json:"updated_at"`
 	CreatedAt   int64                  `json:"created_at"`
@@ -22,6 +23,13 @@ func FromJSON(data []byte) (*Crypt, error) {
 	var cr Crypt
 	if err := json.Unmarshal(data, &cr); err != nil {
 		return nil, err
+	}
+	if cr.Id == "" {
+		var err error
+		cr.Id, err = shortid.Generate()
+		if err != nil {
+			return nil, err
+		}
 	}
 	return &cr, nil
 }

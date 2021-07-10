@@ -23,7 +23,7 @@ var editCmd = &cobra.Command{
 Similar flow to the add command however, blank
 values are interpreted as a no-op.
 `,
-	Args: parseService,
+	Args: combineArgs(backupCrypt, parseService),
 	RunE: edit,
 }
 

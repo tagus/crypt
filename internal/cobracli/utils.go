@@ -1,9 +1,9 @@
 package cobracli
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -52,22 +52,23 @@ func parseService(cmd *cobra.Command, args []string) error {
 
 // backupStore duplicates the current store at the current location at the instant level
 func backupCrypt(cmd *cobra.Command, args []string) error {
-	ts := time.Now().Unix()
-	ext := filepath.Ext(cryptfile)
-	base := strings.TrimSuffix(filepath.Base(cryptfile), ext)
-	backupFile := base + strconv.FormatInt(ts, 10) + ext
-	home, err := homedir.Dir()
-	if err != nil {
-		return err
-	}
-	backupDir := filepath.Join(home, ".cryptrc", "backups")
-	if err := os.MkdirAll(backupDir, os.ModePerm); err != nil {
-		return err
-	}
 	st, err := getStore()
 	if err != nil {
 		return err
 	}
+
+	ts := time.Now().Unix()
+	backupFile := fmt.Sprintf("%s-%d.cryptfile", st.Crypt.Id, ts)
+	home, err := homedir.Dir()
+	if err != nil {
+		return err
+	}
+
+	backupDir := filepath.Join(home, ".cryptrc", "backups")
+	if err := os.MkdirAll(backupDir, os.ModePerm); err != nil {
+		return err
+	}
+
 	return st.SaveTo(filepath.Join(backupDir, backupFile))
 }
 

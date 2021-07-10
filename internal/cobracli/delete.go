@@ -14,7 +14,7 @@ var deleteCmd = &cobra.Command{
 deleted service cannot be recovered.`,
 	Args:    combineArgs(backupCrypt, parseService),
 	RunE:    delete,
-	Aliases: []string{"del", "remove"},
+	Aliases: []string{"del", "rm"},
 }
 
 func delete(cmd *cobra.Command, args []string) error {

@@ -70,13 +70,13 @@ func resolveCryptfilePath() (string, error) {
 	if cryptfile != "" {
 		return cryptfile, nil
 	}
-	home, err := homedir.Dir()
-	if err != nil {
-		return "", err
-	}
 	path, ok := os.LookupEnv("CRYPTFILE")
 	if ok {
 		return path, nil
+	}
+	home, err := homedir.Dir()
+	if err != nil {
+		return "", err
 	}
 	path = filepath.Join(home, ".cryptfile")
 	return path, nil

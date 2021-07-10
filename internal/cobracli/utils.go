@@ -1,9 +1,14 @@
 package cobracli
 
 import (
+	"os"
+	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/fatih/color"
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/asker"
 	"github.com/tagus/crypt/internal/finder"
@@ -45,6 +50,27 @@ func parseService(cmd *cobra.Command, args []string) error {
 	return setService(matches[n])
 }
 
+// backupStore duplicates the current store at the current location at the instant level
+func backupCrypt(cmd *cobra.Command, args []string) error {
+	ts := time.Now().Unix()
+	ext := filepath.Ext(cryptfile)
+	base := strings.TrimSuffix(filepath.Base(cryptfile), ext)
+	backupFile := base + strconv.FormatInt(ts, 10) + ext
+	home, err := homedir.Dir()
+	if err != nil {
+		return err
+	}
+	backupDir := filepath.Join(home, ".cryptrc", "backups")
+	if err := os.MkdirAll(backupDir, os.ModePerm); err != nil {
+		return err
+	}
+	st, err := getStore()
+	if err != nil {
+		return err
+	}
+	return st.SaveTo(filepath.Join(backupDir, backupFile))
+}
+
 // serviceIsNew ensures that the given service does not already exist
 func serviceIsNew(cmd *cobra.Command, args []string) error {
 	if len(args) != 1 {
@@ -70,4 +96,15 @@ func saveStore() error {
 		return err
 	}
 	return st.Save()
+}
+
+func combineArgs(fns ...cobra.PositionalArgs) cobra.PositionalArgs {
+	return func(cmd *cobra.Command, args []string) error {
+		for _, fn := range fns {
+			if err := fn(cmd, args); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
 }

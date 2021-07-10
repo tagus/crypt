@@ -12,7 +12,7 @@ var deleteCmd = &cobra.Command{
 	Short: "delete the given service from crypt",
 	Long: `Delete a service from the crypt getStore(). Note that the
 deleted service cannot be recovered.`,
-	Args:    parseService,
+	Args:    combineArgs(backupCrypt, parseService),
 	RunE:    delete,
 	Aliases: []string{"del", "remove"},
 }

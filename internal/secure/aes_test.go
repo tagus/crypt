@@ -16,6 +16,7 @@ var (
 		Password:    "mars321",
 	}
 	cr = &crypt.Crypt{
+		Id: "test-crypt",
 		Credentials: map[string]*crypt.Credential{
 			"ebay": ebay,
 		},

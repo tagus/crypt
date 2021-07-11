@@ -6,41 +6,52 @@
 package finder
 
 import (
-	"strings"
-
+	"github.com/blevesearch/bleve/v2"
 	"github.com/tagus/crypt/internal/crypt"
 )
 
 type Finder struct {
-	crypt    *crypt.Crypt
-	services []string
+	cr  *crypt.Crypt
+	idx bleve.Index
 }
 
-func New(cr *crypt.Crypt) *Finder {
-	services := make([]string, 0, len(cr.Credentials))
+func New(cr *crypt.Crypt) (*Finder, error) {
+	mapping := bleve.NewIndexMapping()
+	idx, err := bleve.NewMemOnly(mapping)
+	if err != nil {
+		return nil, err
+	}
+
 	for _, cred := range cr.Credentials {
-		services = append(services, cred.Service)
+		idx.Index(cred.Id, cred)
 	}
 	return &Finder{
-		crypt:    cr,
-		services: services,
-	}
+		cr:  cr,
+		idx: idx,
+	}, err
 }
 
-func (f *Finder) Filter(query string) []*crypt.Credential {
+func (f *Finder) Filter(query string) ([]*crypt.Credential, error) {
+	search := bleve.NewSearchRequest(bleve.NewMatchQuery(query))
+	results, err := f.idx.Search(search)
+	if err != nil {
+		return nil, err
+	}
+
 	var matches []*crypt.Credential
-	for _, cred := range f.crypt.Credentials {
-		if strings.EqualFold(query, cred.Service) {
-			matches = append(matches, cred)
-		}
+	for _, cred := range results.Hits {
+		matches = append(matches, f.cr.GetCredential(cred.ID))
 	}
-	return matches
+	return matches, err
 }
 
-func (f *Finder) Find(query string) *crypt.Credential {
-	matches := f.Filter(query)
-	if len(matches) > 0 {
-		return matches[0]
+func (f *Finder) Find(query string) (*crypt.Credential, error) {
+	matches, err := f.Filter(query)
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	if len(matches) > 0 {
+		return matches[0], nil
+	}
+	return nil, nil
 }

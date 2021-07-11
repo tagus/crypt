@@ -30,28 +30,49 @@ var (
 		Email:       "obrien@google.com",
 		Password:    "doublethink",
 	}
+	google2 = &crypt.Credential{
+		Id:          "acct-4",
+		Service:     "Google Again",
+		Description: "big brother 2",
+		Email:       "winston@google.com",
+		Password:    "newspeak",
+	}
 
 	cr = &crypt.Crypt{
 		Credentials: map[string]*crypt.Credential{
 			"acct-2": amazon,
 			"acct-1": ebay,
 			"acct-3": google,
+			"acct-4": google2,
 		},
 		CreatedAt: time.Now().Unix(),
 		UpdatedAt: time.Now().Unix(),
 	}
 )
 
-func TestFinder_QueryForNonexistentService(t *testing.T) {
-	finder := New(cr)
-	svcs := finder.Filter("non-existent")
+func TestFinder_FilterForNonExistentService(t *testing.T) {
+	finder, err := New(cr)
+	assert.NoError(t, err)
+	svcs, err := finder.Filter("non-existent")
+	assert.NoError(t, err)
 	assert.Empty(t, svcs)
 }
 
-func TestFinder_QueryByServiceName(t *testing.T) {
-	finder := New(cr)
-	svcs := finder.Filter("google")
-	assert.Len(t, svcs, 1)
-	assert.Equal(t, "acct-3", svcs[0].Id)
-	assert.Equal(t, "Google", svcs[0].Service)
+func TestFinder_Filter(t *testing.T) {
+	finder, err := New(cr)
+	assert.NoError(t, err)
+
+	svcs, err := finder.Filter("google")
+	assert.NoError(t, err)
+	assert.Len(t, svcs, 2)
+}
+
+func TestFinder_Find(t *testing.T) {
+	finder, err := New(cr)
+	assert.NoError(t, err)
+
+	svc, err := finder.Find("ebay")
+	assert.NoError(t, err)
+	assert.Equal(t, "acct-1", svc.Id)
+	assert.Equal(t, "eBay", svc.Service)
 }

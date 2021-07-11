@@ -28,8 +28,15 @@ func parseService(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	fd := finder.New(st.Crypt)
-	matches := fd.Filter(strings.Join(args, " "))
+	fd, err := finder.New(st.Crypt)
+	if err != nil {
+		return err
+	}
+
+	matches, err := fd.Filter(strings.Join(args, " "))
+	if err != nil {
+		return err
+	}
 	if len(matches) == 0 {
 		return xerrors.Errorf("invalid service provided: %v", args)
 	}
@@ -81,8 +88,14 @@ func serviceIsNew(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	fd := finder.New(st.Crypt)
-	cred := fd.Find(args[0])
+	fd, err := finder.New(st.Crypt)
+	if err != nil {
+		return err
+	}
+	cred, err := fd.Find(args[0])
+	if err != nil {
+		return err
+	}
 	if cred == nil {
 		return nil
 	}

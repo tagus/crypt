@@ -2,6 +2,7 @@ package cobracli
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/tagus/crypt/internal/asker"
@@ -11,7 +12,7 @@ import (
 )
 
 var (
-	fields = []string{"email", "username", "password", "description", "exit"}
+	fields = []string{"email", "username", "password", "description", "tags", "exit"}
 )
 
 // editCmd represents the edit command
@@ -63,6 +64,16 @@ func edit(cmd *cobra.Command, args []string) error {
 				return err
 			}
 		case 4:
+			val, err := asker.Ask("tag")
+			if err != nil {
+				return err
+			}
+			tags := strings.Split(val, ",")
+			for i, tag := range tags {
+				tags[i] = strings.TrimSpace(tag)
+			}
+			updated.Tags = append(updated.Tags, tags...)
+		case 5:
 			exit = true
 		}
 

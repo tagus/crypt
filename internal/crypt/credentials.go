@@ -3,6 +3,8 @@ package crypt
 import (
 	"strings"
 	"time"
+
+	"github.com/tagus/crypt/internal/utils/sets"
 )
 
 // Credential houses all pertinent information for a given service
@@ -69,6 +71,14 @@ func (c *Credential) Merge(cred *Credential) *Credential {
 		if val != "" {
 			dirty = true
 			c.Description = val
+		}
+	}
+	if len(cred.Tags) > 0 {
+		ss := sets.NewString(c.Tags...)
+		ss.Add(cred.Tags...)
+		if ss.Len() > len(c.Tags) {
+			c.Tags = ss.AsSlice()
+			dirty = true
 		}
 	}
 	if dirty {

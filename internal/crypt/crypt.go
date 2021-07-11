@@ -8,7 +8,7 @@ import (
 )
 
 // Version represents the current version of the cryptfile + cli
-const Version = "v1.6"
+const Version = "v1.6.1"
 
 // Crypt represents contents of a crypt file
 type Crypt struct {

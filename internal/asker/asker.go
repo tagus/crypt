@@ -8,6 +8,10 @@ import (
 	"golang.org/x/xerrors"
 )
 
+var (
+	ErrInterrupt = xerrors.New("interrupted through signal")
+)
+
 // Asker is a helper for retrieving user input from the given reader
 type Asker struct {
 	IsVimMode bool
@@ -107,6 +111,9 @@ func (a *Asker) AskSecret(question string, confirm bool, validations ...Validati
 
 	res, err := ask.Run()
 	if err != nil {
+		if err == promptui.ErrEOF || err == promptui.ErrInterrupt {
+			return "", ErrInterrupt
+		}
 		return "", err
 	}
 

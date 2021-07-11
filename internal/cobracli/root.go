@@ -10,7 +10,6 @@ import (
 	"github.com/tagus/crypt/internal/asker"
 	"github.com/tagus/crypt/internal/crypt"
 	"github.com/tagus/crypt/internal/store"
-	"github.com/tagus/crypt/internal/utils"
 	"golang.org/x/xerrors"
 )
 
@@ -46,7 +45,11 @@ of mechanisms to specify the crypt file, specified here in decreasing priority.
 // Execute executes the root cobra command
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		os.Exit(1)
+		if err == asker.ErrInterrupt {
+			os.Exit(0)
+		} else {
+			os.Exit(1)
+		}
 	}
 }
 
@@ -84,11 +87,15 @@ func resolveCryptfilePath() (string, error) {
 
 func initStore() (*store.CryptStore, error) {
 	path, err := resolveCryptfilePath()
-	utils.FatalIf(err)
+	if err != nil {
+		return nil, err
+	}
 
 	asker := asker.DefaultAsker()
 	pwd, err := asker.AskSecret(color.YellowString("pwd"), false)
-	utils.FatalIf(err)
+	if err != nil {
+		return nil, err
+	}
 
 	_, err = os.Stat(path)
 	if err != nil {

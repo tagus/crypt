@@ -6,7 +6,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/asker"
-	"github.com/tagus/crypt/internal/utils"
 )
 
 // exportCmd represents the export command
@@ -23,7 +22,9 @@ function and should be used sparingly.`,
 func export(cmd *cobra.Command, args []string) error {
 	asker := asker.DefaultAsker()
 	ok, err := asker.AskConfirm("are you sure you want to export the cryptfile?")
-	utils.FatalIf(err)
+	if err != nil {
+		return err
+	}
 
 	if ok {
 		st, err := getStore()

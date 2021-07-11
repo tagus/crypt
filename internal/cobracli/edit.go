@@ -6,7 +6,6 @@ import (
 	"github.com/fatih/color"
 	"github.com/tagus/crypt/internal/asker"
 	"github.com/tagus/crypt/internal/crypt"
-	"github.com/tagus/crypt/internal/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -77,7 +76,9 @@ func edit(cmd *cobra.Command, args []string) error {
 
 	msg := color.YellowString("do these updated values make sense?")
 	ok, err := asker.AskConfirm(msg)
-	utils.FatalIf(err)
+	if err != nil {
+		return err
+	}
 	if ok {
 		svc.Merge(updated)
 		color.Green("updated service '%s'", svc.Service)

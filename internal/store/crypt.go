@@ -14,15 +14,22 @@ const (
 	modePerm = 0600
 )
 
+// Crypto defines a simple interface for any struct that can encrypt
+// and decrypt crypt data.
+type Crypto interface {
+	Encrypt(crypt *crypt.Crypt) ([]byte, error)
+	Decrypt(cipher []byte) (*crypt.Crypt, error)
+}
+
 // CryptStore represents a crypt instance stored as a file
 type CryptStore struct {
 	*crypt.Crypt
 	path   string
-	crypto secure.Crypto
+	crypto Crypto
 }
 
 // createNewStore creates an empty crypt store in the given path
-func createNewStore(path string, crypto secure.Crypto, cr *crypt.Crypt) (*CryptStore, error) {
+func createNewStore(path string, crypto Crypto, cr *crypt.Crypt) (*CryptStore, error) {
 	_, err := os.Stat(path)
 	if err == nil {
 		return nil, xerrors.New("cryptfile already exists 😬")

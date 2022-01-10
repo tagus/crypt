@@ -1,12 +1,12 @@
-// Copyright © 2018 Sugat Poudel <taguspoudel@gmail.com>
-
 package cobracli
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 
 	"github.com/spf13/cobra"
+	"github.com/tagus/crypt/internal/crypt"
 	"github.com/tagus/crypt/internal/utils"
 )
 
@@ -25,7 +25,13 @@ func ls(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	creds := st.Credentials
+	creds := make([]*crypt.Credential, 0, len(st.Credentials))
+	for _, v := range st.Credentials {
+		creds = append(creds, v)
+	}
+	sort.Slice(creds, func(i, j int) bool {
+		return creds[i].CreatedAt > creds[j].CreatedAt
+	})
 
 	data := make([][]string, len(creds))
 	counter := 0

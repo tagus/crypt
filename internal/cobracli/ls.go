@@ -10,6 +10,8 @@ import (
 	"github.com/tagus/crypt/internal/utils"
 )
 
+var lsLimit int
+
 // lsCmd represents the ls command
 var lsCmd = &cobra.Command{
 	Use:     "ls",
@@ -17,6 +19,10 @@ var lsCmd = &cobra.Command{
 	Long:    `lists the name of all stored service credentials.`,
 	RunE:    ls,
 	Aliases: []string{"list"},
+}
+
+func init() {
+	lsCmd.Flags().IntVarP(&lsLimit, "limit", "l", 0, "limit the number of servies to list")
 }
 
 func ls(cmd *cobra.Command, args []string) error {
@@ -33,6 +39,10 @@ func ls(cmd *cobra.Command, args []string) error {
 		return creds[i].CreatedAt > creds[j].CreatedAt
 	})
 
+	if lsLimit > 0 {
+		creds = creds[:utils.Min(lsLimit, len(creds))]
+	}
+
 	data := make([][]string, len(creds))
 	counter := 0
 	for _, v := range creds {
@@ -44,7 +54,7 @@ func ls(cmd *cobra.Command, args []string) error {
 	utils.PrintTable(data, utils.TableOpts{
 		Headers: []string{"index", "name", "created at"},
 	})
-	fmt.Printf("%d credential(s).\n", len(creds))
+	fmt.Printf("%d total credential(s).\n", len(st.Credentials))
 
 	return nil
 }

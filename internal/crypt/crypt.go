@@ -8,7 +8,7 @@ import (
 )
 
 // Version represents the current version of the cryptfile + cli
-const Version = "v1.7.2"
+const Version = "v1.7.3"
 
 // Crypt represents contents of a crypt file
 type Crypt struct {
@@ -31,6 +31,21 @@ func FromJSON(data []byte) (*Crypt, error) {
 			return nil, err
 		}
 	}
+
+	// fixes all missing ids from individual credentials
+	for key, cred := range cr.Credentials {
+		if cred.Id == "" {
+			id, err := shortid.Generate()
+			if err != nil {
+				return nil, err
+			}
+
+			cred.Id = id
+			delete(cr.Credentials, key)
+			cr.Credentials[id] = cred
+		}
+	}
+
 	return &cr, nil
 }
 

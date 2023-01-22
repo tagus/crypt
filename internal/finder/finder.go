@@ -23,7 +23,9 @@ func New(cr *crypt.Crypt) (*Finder, error) {
 	}
 
 	for _, cred := range cr.Credentials {
-		idx.Index(cred.Id, cred)
+		if err := idx.Index(cred.Id, cred); err != nil {
+			return nil, err
+		}
 	}
 	return &Finder{
 		cr:  cr,

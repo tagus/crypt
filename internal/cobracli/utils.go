@@ -33,7 +33,8 @@ func parseService(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	matches, err := fd.Filter(strings.Join(args, " "))
+	q := strings.Join(args, " ")
+	matches, err := fd.Filter(q)
 	if err != nil {
 		return err
 	}

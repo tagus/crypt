@@ -12,7 +12,6 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.8.1
 	github.com/teris-io/shortid v0.0.0-20220617161101-71ec9f2aa569
-	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
 )
 
 require (
@@ -50,6 +49,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.etcd.io/bbolt v1.3.6 // indirect
 	golang.org/x/sys v0.4.0 // indirect
+	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

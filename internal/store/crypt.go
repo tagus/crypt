@@ -1,13 +1,13 @@
 package store
 
 import (
+	"errors"
 	"io/ioutil"
 	"os"
 	"time"
 
 	"github.com/tagus/crypt/internal/crypt"
 	"github.com/tagus/crypt/internal/secure"
-	"golang.org/x/xerrors"
 )
 
 const (
@@ -32,7 +32,7 @@ type CryptStore struct {
 func createNewStore(path string, crypto Crypto, cr *crypt.Crypt) (*CryptStore, error) {
 	_, err := os.Stat(path)
 	if err == nil {
-		return nil, xerrors.New("cryptfile already exists 😬")
+		return nil, errors.New("cryptfile already exists 😬")
 	}
 
 	enc, err := crypto.Encrypt(cr)
@@ -77,7 +77,7 @@ func Decrypt(path, pwd string) (*CryptStore, error) {
 
 	crypt, err := crypto.Decrypt(data)
 	if err != nil {
-		return nil, xerrors.New("password was invalid, decryption failed")
+		return nil, errors.New("password was invalid, decryption failed")
 	}
 
 	store := &CryptStore{

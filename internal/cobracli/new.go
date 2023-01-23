@@ -1,6 +1,7 @@
 package cobracli
 
 import (
+	"errors"
 	"io/ioutil"
 	"os"
 	"time"
@@ -9,7 +10,6 @@ import (
 	"github.com/tagus/crypt/internal/asker"
 	"github.com/tagus/crypt/internal/crypt"
 	"github.com/tagus/crypt/internal/store"
-	"golang.org/x/xerrors"
 )
 
 var seedFile string
@@ -54,7 +54,7 @@ func new(cmd *cobra.Command, args []string) error {
 		}
 		return err
 	}
-	return xerrors.New("cryptfile already exists")
+	return errors.New("cryptfile already exists")
 }
 
 func buildCrypt() (*crypt.Crypt, error) {

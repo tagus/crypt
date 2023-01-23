@@ -1,15 +1,15 @@
 package asker
 
 import (
+	"errors"
 	"io"
 	"strings"
 
 	"github.com/manifoldco/promptui"
-	"golang.org/x/xerrors"
 )
 
 var (
-	ErrInterrupt = xerrors.New("interrupted through signal")
+	ErrInterrupt = errors.New("interrupted through signal")
 )
 
 // Asker is a helper for retrieving user input from the given reader
@@ -122,7 +122,7 @@ func (a *Asker) AskSecret(question string, confirm bool, validations ...Validati
 			Label: "confirm " + question,
 			Validate: func(val string) error {
 				if val != res {
-					return xerrors.New("confirmation does not match")
+					return errors.New("confirmation does not match")
 				}
 				return nil
 			},

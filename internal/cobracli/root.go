@@ -1,6 +1,7 @@
 package cobracli
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 
@@ -10,7 +11,6 @@ import (
 	"github.com/tagus/crypt/internal/asker"
 	"github.com/tagus/crypt/internal/crypt"
 	"github.com/tagus/crypt/internal/store"
-	"golang.org/x/xerrors"
 )
 
 var (
@@ -67,22 +67,40 @@ func init() {
 }
 
 // resolveCryptfilePath determines the path of the cryptfile to be used, the cryptfile
-// flag takes priority, falling back to a CRYPTFILE env var, and finally defaulting
-// to a .cryptfile in the current user's home directory
+// flag takes priority, falling back to a CRYPTFILE env var, .cryptfile is the current working
+// directory and finally defaulting to a .cryptfile in the current user's home directory
 func resolveCryptfilePath() (string, error) {
-	if cryptfile != "" {
-		return cryptfile, nil
-	}
-	path, ok := os.LookupEnv("CRYPTFILE")
-	if ok {
-		return path, nil
-	}
-	home, err := homedir.Dir()
+	wd, err := os.Getwd()
 	if err != nil {
 		return "", err
 	}
-	path = filepath.Join(home, ".cryptfile")
-	return path, nil
+	hd, err := homedir.Dir()
+	if err != nil {
+		return "", err
+	}
+
+	paths := []string{
+		cryptfile,
+		os.Getenv("CRYPTFILE"),
+		filepath.Join(wd, ".cryptfile"),
+		filepath.Join(hd, ".cryptfile"),
+	}
+
+	for _, path := range paths {
+		if path == "" {
+			continue
+		}
+		_, err = os.Stat(path)
+		if err != nil {
+			if os.IsNotExist(err) {
+				continue
+			}
+			return "", err
+		}
+		return path, nil
+	}
+
+	return "", errors.New("no valid cryptfile found")
 }
 
 func initStore() (*store.CryptStore, error) {
@@ -94,14 +112,6 @@ func initStore() (*store.CryptStore, error) {
 	asker := asker.DefaultAsker()
 	pwd, err := asker.AskSecret(color.YellowString("pwd"), false)
 	if err != nil {
-		return nil, err
-	}
-
-	_, err = os.Stat(path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, xerrors.New("cryptfile does not exist")
-		}
 		return nil, err
 	}
 
@@ -123,7 +133,7 @@ func getStore() (*store.CryptStore, error) {
 
 func setService(service *crypt.Credential) error {
 	if svc != nil {
-		return xerrors.New("service already set")
+		return errors.New("service already set")
 	}
 	svc = service
 	return nil
@@ -131,7 +141,7 @@ func setService(service *crypt.Credential) error {
 
 func getService() (*crypt.Credential, error) {
 	if svc == nil {
-		return nil, xerrors.New("no service set")
+		return nil, errors.New("no service set")
 	}
 	return svc, nil
 }

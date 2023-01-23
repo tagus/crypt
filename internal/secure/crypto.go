@@ -4,9 +4,8 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"strings"
-
-	"golang.org/x/xerrors"
 )
 
 // Computes an SHA 256 bit given the key string.
@@ -32,7 +31,7 @@ func SignMessage(msg string, key []byte) string {
 func DecodeMessage(msg string, key []byte) (string, error) {
 	args := strings.Split(msg, "-")
 	if len(args) != 2 {
-		return "", xerrors.New("invalid message")
+		return "", errors.New("invalid message")
 	}
 
 	mac := hmac.New(sha256.New, key)
@@ -42,5 +41,5 @@ func DecodeMessage(msg string, key []byte) (string, error) {
 	if hmac.Equal(token, []byte(args[1])) {
 		return args[0], nil
 	}
-	return "", xerrors.New("invalid token")
+	return "", errors.New("invalid token")
 }

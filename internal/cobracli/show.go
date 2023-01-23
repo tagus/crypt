@@ -1,10 +1,11 @@
 package cobracli
 
 import (
+	"errors"
+
 	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/crypt"
-	"golang.org/x/xerrors"
 )
 
 // showCmd represents the show command
@@ -25,7 +26,7 @@ func show(cmd *cobra.Command, args []string) error {
 
 	err = clipboard.WriteAll(svc.Password)
 	if err != nil {
-		return xerrors.Errorf("failed to copy pwd")
+		return errors.New("failed to copy pwd")
 	}
 
 	crypt.PrintCredential(svc)

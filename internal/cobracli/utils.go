@@ -1,6 +1,7 @@
 package cobracli
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -12,7 +13,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/asker"
 	"github.com/tagus/crypt/internal/finder"
-	"golang.org/x/xerrors"
 )
 
 // parseService parses the args to a single service credential and storing it globally
@@ -20,7 +20,7 @@ import (
 // place to choose the right service.
 func parseService(cmd *cobra.Command, args []string) error {
 	if len(args) == 0 {
-		return xerrors.Errorf("no service provided")
+		return errors.New("no service provided")
 	}
 
 	st, err := getStore()
@@ -39,7 +39,7 @@ func parseService(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	if len(matches) == 0 {
-		return xerrors.Errorf("invalid service provided: %v", args)
+		return fmt.Errorf("invalid service provided: %v", args)
 	}
 	if len(matches) == 1 {
 		return setService(matches[0])
@@ -83,7 +83,7 @@ func backupCrypt(cmd *cobra.Command, args []string) error {
 // serviceIsNew ensures that the given service does not already exist
 func serviceIsNew(cmd *cobra.Command, args []string) error {
 	if len(args) != 1 {
-		return xerrors.New("requires exactly one arg")
+		return errors.New("requires exactly one arg")
 	}
 	st, err := getStore()
 	if err != nil {
@@ -100,7 +100,7 @@ func serviceIsNew(cmd *cobra.Command, args []string) error {
 	if cred == nil {
 		return nil
 	}
-	return xerrors.Errorf("service already exists")
+	return errors.New("service already exists")
 }
 
 // saveStore persists any current changes to the st to the specified cryptfile

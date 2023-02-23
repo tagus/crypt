@@ -10,6 +10,7 @@ import (
 
 var (
 	ebay = &crypt.Credential{
+		Id:          "test-cred",
 		Service:     "eBay",
 		Description: "electronic auction bay",
 		Username:    "beanie_babies123",

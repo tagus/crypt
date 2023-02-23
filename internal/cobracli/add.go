@@ -47,14 +47,15 @@ func add(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	ts := time.Now().Unix()
 	cred := &crypt.Credential{
 		Service:     service,
 		Email:       email,
 		Username:    user,
 		Password:    pwd,
 		Description: desc,
-		CreatedAt:   time.Now().Unix(),
-		UpdatedAt:   time.Now().Unix(),
+		CreatedAt:   ts,
+		UpdatedAt:   ts,
 	}
 
 	crypt.PrintCredential(cred)

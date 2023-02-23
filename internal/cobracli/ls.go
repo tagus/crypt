@@ -22,7 +22,7 @@ var lsCmd = &cobra.Command{
 }
 
 func init() {
-	lsCmd.Flags().IntVarP(&lsLimit, "limit", "l", 0, "limit the number of servies to list")
+	lsCmd.Flags().IntVarP(&lsLimit, "limit", "l", 0, "limit the number of services to list")
 }
 
 func ls(cmd *cobra.Command, args []string) error {
@@ -36,7 +36,10 @@ func ls(cmd *cobra.Command, args []string) error {
 		creds = append(creds, v)
 	}
 	sort.Slice(creds, func(i, j int) bool {
-		return creds[i].CreatedAt > creds[j].CreatedAt
+		if creds[i].AccessedAt == nil || creds[j].AccessedAt == nil {
+			return creds[j].AccessedAt == nil
+		}
+		return *creds[i].AccessedAt > *creds[j].AccessedAt
 	})
 
 	if lsLimit > 0 {
@@ -46,13 +49,16 @@ func ls(cmd *cobra.Command, args []string) error {
 	data := make([][]string, len(creds))
 	counter := 0
 	for _, v := range creds {
-		createdAt := v.GetCreatedAt().Format("01/02/2006")
-		data[counter] = []string{strconv.Itoa(counter), v.Service, createdAt}
+		data[counter] = []string{
+			strconv.Itoa(counter),
+			v.Service,
+			utils.FormatTimeSince(v.GetAccessedAt()),
+		}
 		counter++
 	}
 
 	utils.PrintTable(data, utils.TableOpts{
-		Headers: []string{"index", "name", "created at"},
+		Headers: []string{"index", "name", "last accessed at"},
 	})
 	fmt.Printf("%d total credential(s).\n", len(st.Credentials))
 

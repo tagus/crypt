@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/fatih/color"
 	homedir "github.com/mitchellh/go-homedir"
@@ -36,7 +37,7 @@ of mechanisms to specify the crypt file, specified here in decreasing priority.
 
 	1. cryptfile flag
 	2. CRYPTFILE env variable
-	3. ~/.crytpfile`,
+	3. ~/.cryptfile`,
 	SilenceUsage: true,
 	// SilenceErrors: true,
 	Version: crypt.Version,
@@ -97,6 +98,7 @@ func resolveCryptfilePath() (string, error) {
 			}
 			return "", err
 		}
+		color.Yellow("using crypt at: " + path)
 		return path, nil
 	}
 
@@ -136,7 +138,11 @@ func setService(service *crypt.Credential) error {
 		return errors.New("service already set")
 	}
 	svc = service
-	return nil
+	ts := time.Now().Unix()
+
+	svc.AccessedAt = &ts
+	svc.AccessedCount += 1
+	return saveStore()
 }
 
 func getService() (*crypt.Credential, error) {

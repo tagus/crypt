@@ -41,8 +41,8 @@ func info(cmd *cobra.Command, args []string) error {
 		{"updated at", st.GetUpdatedAt().Format("01/02/2006")},
 		{"version", st.Crypt.Version},
 	}
-
 	fmt.Println(title)
 	utils.PrintTable(data, utils.TableOpts{})
+
 	return nil
 }

@@ -9,17 +9,19 @@ import (
 
 // Credential houses all pertinent information for a given service
 type Credential struct {
-	Id          string   `json:"id"`
-	Service     string   `json:"service"`
-	Domains     []string `json:"domains"`
-	Email       string   `json:"email"`
-	Username    string   `json:"username"`
-	Password    string   `json:"password"`
-	Description string   `json:"description"`
-	Details     []Detail `json:"details"`
-	Tags        []string `json:"tags"`
-	CreatedAt   int64    `json:"created_at"`
-	UpdatedAt   int64    `json:"updated_at"`
+	Id            string   `json:"id"`
+	Service       string   `json:"service"`
+	Domains       []string `json:"domains"`
+	Email         string   `json:"email"`
+	Username      string   `json:"username"`
+	Password      string   `json:"password"`
+	Description   string   `json:"description"`
+	Details       []Detail `json:"details"`
+	Tags          []string `json:"tags"`
+	CreatedAt     int64    `json:"created_at"`
+	UpdatedAt     int64    `json:"updated_at"`
+	AccessedAt    *int64   `json:"accessed_at"`
+	AccessedCount int      `json:"accessed_count"`
 }
 
 // Detail models an arbitrary key value pair
@@ -34,6 +36,14 @@ func (c *Credential) GetCreatedAt() time.Time {
 
 func (c *Credential) GetUpdatedAt() time.Time {
 	return time.Unix(c.UpdatedAt, 0)
+}
+
+func (c *Credential) GetAccessedAt() *time.Time {
+	if c.AccessedAt == nil {
+		return nil
+	}
+	ts := time.Unix(*c.AccessedAt, 0)
+	return &ts
 }
 
 func (c *Credential) Merge(cred *Credential) *Credential {

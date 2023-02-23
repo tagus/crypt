@@ -12,7 +12,8 @@ func PrintCredential(cred *Credential) {
 		{"id", cred.Id},
 		{"email", normalizeField(cred.Email)},
 		{"username", normalizeField(cred.Username)},
-		{"pwd", "// redacted //"},
+		{"created_at", utils.FormatDate(cred.GetCreatedAt())},
+		{"updated_at", utils.FormatDate(cred.GetUpdatedAt())},
 		{"tags", fmt.Sprintf("%v", cred.Tags)},
 	}
 

@@ -34,7 +34,7 @@ func New(cr *crypt.Crypt) (*Finder, error) {
 }
 
 func (f *Finder) Filter(query string) ([]*crypt.Credential, error) {
-	search := bleve.NewSearchRequest(bleve.NewMatchQuery(query))
+	search := bleve.NewSearchRequest(bleve.NewFuzzyQuery(query))
 	results, err := f.idx.Search(search)
 	if err != nil {
 		return nil, err

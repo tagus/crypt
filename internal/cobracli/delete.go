@@ -1,6 +1,8 @@
 package cobracli
 
 import (
+	"fmt"
+
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/asker"
@@ -18,16 +20,17 @@ deleted service cannot be recovered.`,
 }
 
 func delete(cmd *cobra.Command, args []string) error {
+	svc, err := getService()
+	if err != nil {
+		return err
+	}
+
 	asker := asker.DefaultAsker()
-	ok, err := asker.AskConfirm("are you sure you want delete this service?")
+	ok, err := asker.AskConfirm(fmt.Sprintf("are you sure you want delete %s?", svc.Service))
 	if err != nil {
 		return err
 	}
 	if ok {
-		svc, err := getService()
-		if err != nil {
-			return err
-		}
 
 		st, err := getStore()
 		if err != nil {

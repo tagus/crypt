@@ -10,6 +10,7 @@ import (
 func PrintCredential(cred *Credential) {
 	data := [][]string{
 		{"id", cred.Id},
+		{"service", normalizeField(cred.Service)},
 		{"email", normalizeField(cred.Email)},
 		{"username", normalizeField(cred.Username)},
 		{"created_at", utils.FormatDate(cred.GetCreatedAt())},

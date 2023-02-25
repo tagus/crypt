@@ -12,10 +12,9 @@ import (
 )
 
 var (
-	fields = []string{"email", "username", "password", "description", "tags", "exit"}
+	fields = []string{"email", "username", "password", "description", "tags", "name", "exit"}
 )
 
-// editCmd represents the edit command
 var editCmd = &cobra.Command{
 	Use:   "edit [service]",
 	Short: "edit fields for the given service",
@@ -74,6 +73,11 @@ func edit(cmd *cobra.Command, args []string) error {
 			}
 			updated.Tags = append(updated.Tags, tags...)
 		case 5:
+			updated.Service, err = asker.Ask("service name")
+			if err != nil {
+				return err
+			}
+		case 6:
 			exit = true
 		}
 

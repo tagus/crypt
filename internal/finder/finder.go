@@ -27,6 +27,7 @@ func New(cr *crypt.Crypt) (*Finder, error) {
 			return nil, err
 		}
 	}
+
 	return &Finder{
 		cr:  cr,
 		idx: idx,
@@ -34,15 +35,18 @@ func New(cr *crypt.Crypt) (*Finder, error) {
 }
 
 func (f *Finder) Filter(query string) ([]*crypt.Credential, error) {
-	search := bleve.NewSearchRequest(bleve.NewFuzzyQuery(query))
+	qu := bleve.NewMatchQuery(query)
+
+	search := bleve.NewSearchRequest(qu)
 	results, err := f.idx.Search(search)
 	if err != nil {
 		return nil, err
 	}
 
 	var matches []*crypt.Credential
-	for _, cred := range results.Hits {
-		matches = append(matches, f.cr.GetCredential(cred.ID))
+	for _, hit := range results.Hits {
+		cred := f.cr.GetCredential(hit.ID)
+		matches = append(matches, cred)
 	}
 	return matches, err
 }

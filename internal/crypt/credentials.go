@@ -30,6 +30,10 @@ type Detail struct {
 	Value string `json:"value"`
 }
 
+func (c *Credential) String() string {
+	return c.Service
+}
+
 func (c *Credential) GetCreatedAt() time.Time {
 	return time.Unix(c.CreatedAt, 0)
 }

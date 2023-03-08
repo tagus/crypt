@@ -3,7 +3,6 @@ package cobracli
 import (
 	"fmt"
 	"sort"
-	"strconv"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -73,7 +72,7 @@ func ls(cmd *cobra.Command, args []string) error {
 	counter := 0
 	for _, v := range creds {
 		data[counter] = []string{
-			strconv.Itoa(counter),
+			v.Id,
 			v.Service,
 			utils.FormatTimeSince(v.GetAccessedAt()),
 		}
@@ -82,7 +81,7 @@ func ls(cmd *cobra.Command, args []string) error {
 
 	fmt.Printf("%d total credential(s).\n", len(creds))
 	utils.PrintTable(data, utils.TableOpts{
-		Headers: []string{"index", "name", "last accessed at"},
+		Headers: []string{"id", "name", "last accessed at"},
 	})
 
 	return nil

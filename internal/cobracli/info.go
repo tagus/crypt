@@ -40,6 +40,7 @@ func info(cmd *cobra.Command, args []string) error {
 		{"created at", st.GetCreatedAt().Format("01/02/2006")},
 		{"updated at", st.GetUpdatedAt().Format("01/02/2006")},
 		{"version", st.Crypt.Version},
+		{"fingerprint", st.Crypt.GetShortFingerprint()},
 	}
 	fmt.Println(title)
 	utils.PrintTable(data, utils.TableOpts{})

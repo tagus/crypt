@@ -7,7 +7,6 @@ import (
 	"github.com/tagus/crypt/internal/utils/sets"
 )
 
-// Credential houses all pertinent information for a given service
 type Credential struct {
 	Id            string   `json:"id"`
 	Service       string   `json:"service"`
@@ -22,6 +21,7 @@ type Credential struct {
 	UpdatedAt     int64    `json:"updated_at"`
 	AccessedAt    *int64   `json:"accessed_at"`
 	AccessedCount int      `json:"accessed_count"`
+	Fingerprint   string   `json:"fingerprint"`
 }
 
 // Detail models an arbitrary key value pair
@@ -44,6 +44,13 @@ func (c *Credential) GetAccessedAt() *time.Time {
 	}
 	ts := time.Unix(*c.AccessedAt, 0)
 	return &ts
+}
+
+func (c *Credential) GetShortFingerprint() string {
+	if len(c.Fingerprint) < 8 {
+		return c.Fingerprint
+	}
+	return c.Fingerprint[:8]
 }
 
 func (c *Credential) Merge(cred *Credential) *Credential {

@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/asker"
 	"github.com/tagus/crypt/internal/finder"
+	"github.com/tagus/crypt/internal/fingerprinter"
 )
 
 // parseService parses the args to a single service credential and storing it globally
@@ -104,12 +105,28 @@ func serviceIsNew(cmd *cobra.Command, args []string) error {
 }
 
 // saveStore persists any current changes to the st to the specified cryptfile
+// while accounting for any changes to the crypt and credential fingerprints
 func saveStore() error {
 	color.Green("saving crypt")
 	st, err := getStore()
 	if err != nil {
 		return err
 	}
+
+	for id := range st.Credentials {
+		fp, err := fingerprinter.Credential(st.GetCredential(id))
+		if err != nil {
+			return err
+		}
+		st.Credentials[id].Fingerprint = fp
+	}
+
+	fp, err := fingerprinter.Crypt(st.Crypt)
+	if err != nil {
+		return err
+	}
+	st.Crypt.Fingerprint = fp
+
 	return st.Save()
 }
 

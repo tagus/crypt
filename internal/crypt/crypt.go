@@ -8,15 +8,18 @@ import (
 )
 
 // Version represents the current version of the cryptfile + cli
-const Version = "v1.10.2"
+const Version = "v1.11.0"
+
+type Credentials map[string]*Credential
 
 // Crypt represents contents of a crypt file
 type Crypt struct {
-	Id          string                 `json:"id"`
-	Credentials map[string]*Credential `json:"credentials"`
-	UpdatedAt   int64                  `json:"updated_at"`
-	CreatedAt   int64                  `json:"created_at"`
-	Version     string                 `json:"version"`
+	Id          string      `json:"id"`
+	Credentials Credentials `json:"credentials"`
+	UpdatedAt   int64       `json:"updated_at"`
+	CreatedAt   int64       `json:"created_at"`
+	Version     string      `json:"version"`
+	Fingerprint string      `json:"fingerprint"`
 }
 
 func FromJSON(data []byte) (*Crypt, error) {
@@ -88,4 +91,11 @@ func (c *Crypt) GetJSON() ([]byte, error) {
 		return nil, err
 	}
 	return str, nil
+}
+
+func (c *Crypt) GetShortFingerprint() string {
+	if len(c.Fingerprint) < 8 {
+		return c.Fingerprint
+	}
+	return c.Fingerprint[:8]
 }

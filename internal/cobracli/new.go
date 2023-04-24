@@ -9,18 +9,21 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/asker"
 	"github.com/tagus/crypt/internal/crypt"
+	"github.com/tagus/crypt/internal/fingerprinter"
 	"github.com/tagus/crypt/internal/store"
+	"github.com/teris-io/shortid"
 )
 
 var seedFile string
 
 // newCmd represents the new command
 var newCmd = &cobra.Command{
-	Use:     "new",
+	Use:     "new [path]",
 	Short:   "create new cryptfile",
 	Long:    "attempts to create a new cryptfile at the resolved path if one does not already exist.",
 	RunE:    new,
 	Aliases: []string{"init"},
+	Args:    cobra.ExactArgs(1),
 }
 
 func init() {
@@ -28,11 +31,8 @@ func init() {
 }
 
 func new(cmd *cobra.Command, args []string) error {
-	path, err := resolveCryptfilePath()
-	if err != nil {
-		return err
-	}
-	_, err = os.Stat(path)
+	path := args[0]
+	_, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
 			asker := asker.DefaultAsker()
@@ -59,13 +59,26 @@ func new(cmd *cobra.Command, args []string) error {
 
 func buildCrypt() (*crypt.Crypt, error) {
 	if seedFile == "" {
-		credMap := make(map[string]*crypt.Credential)
+		id, err := shortid.Generate()
+		if err != nil {
+			return nil, err
+		}
+
+		credMap := make(crypt.Credentials)
 		now := time.Now().Unix()
-		return &crypt.Crypt{
+		cr := &crypt.Crypt{
+			Id:          id,
 			Credentials: credMap,
 			CreatedAt:   now,
 			UpdatedAt:   now,
-		}, nil
+		}
+
+		fp, err := fingerprinter.Crypt(cr)
+		if err != nil {
+			return nil, err
+		}
+		cr.Fingerprint = fp
+		return cr, nil
 	}
 
 	buf, err := ioutil.ReadFile(seedFile)

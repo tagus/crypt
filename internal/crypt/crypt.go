@@ -8,7 +8,7 @@ import (
 )
 
 // Version represents the current version of the cryptfile + cli
-const Version = "v1.11.0"
+const Version = "v1.12.0"
 
 type Credentials map[string]*Credential
 

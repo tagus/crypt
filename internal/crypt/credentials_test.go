@@ -24,7 +24,7 @@ var (
 	}
 
 	crypt = &Crypt{
-		Credentials: map[string]*Credential{
+		Credentials: Credentials{
 			"acct-1": ebay,
 		},
 		CreatedAt: time.Now().Unix(),

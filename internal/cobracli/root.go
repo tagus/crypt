@@ -65,6 +65,7 @@ func init() {
 	rootCmd.AddCommand(newCmd)
 	rootCmd.AddCommand(pwdCmd)
 	rootCmd.AddCommand(showCmd)
+	rootCmd.AddCommand(diffCmd)
 }
 
 // resolveCryptfilePath determines the path of the cryptfile to be used, the cryptfile

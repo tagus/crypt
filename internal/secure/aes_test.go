@@ -18,7 +18,7 @@ var (
 	}
 	cr = &crypt.Crypt{
 		Id: "test-crypt",
-		Credentials: map[string]*crypt.Credential{
+		Credentials: crypt.Credentials{
 			"ebay": ebay,
 		},
 		CreatedAt: time.Now().Unix(),

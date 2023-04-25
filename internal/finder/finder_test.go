@@ -46,7 +46,7 @@ var (
 	}
 
 	cr = &crypt.Crypt{
-		Credentials: map[string]*crypt.Credential{
+		Credentials: crypt.Credentials{
 			"acct1": ebay,
 			"acct2": amazon,
 			"acct3": google,

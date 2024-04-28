@@ -16,6 +16,7 @@ type Credential struct {
 	UpdatedAt     time.Time  `json:"updated_at"`
 	AccessedAt    *time.Time `json:"accessed_at"`
 	AccessedCount int        `json:"accessed_count"`
+	Version       int        `json:"version"`
 }
 
 type Details struct {

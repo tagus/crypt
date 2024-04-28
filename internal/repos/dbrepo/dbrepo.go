@@ -135,10 +135,6 @@ type QueryCredentialsFilter struct {
 }
 
 func (r *DbRepo) QueryCredentials(ctx context.Context, filter QueryCredentialsFilter) ([]*repos.Credential, error) {
-	if filter.CryptID == "" {
-		return nil, errors.New("crypt id is required")
-	}
-
 	qb := sq.Select(
 		"cr.id",
 		"cr.tags",
@@ -153,12 +149,15 @@ func (r *DbRepo) QueryCredentials(ctx context.Context, filter QueryCredentialsFi
 		"cv.s_password",
 		"cv.description",
 		"cv.s_details",
+		"cv.version",
 	).
 		From("credentials AS cr").
 		InnerJoin("credential_versions AS cv ON cr.id = cv.credential_id AND cr.current_version = cv.version").
-		Where(sq.Eq{"cr.crypt_id": filter.CryptID}).
 		RunWith(r.db)
 
+	if filter.CryptID != "" {
+		qb = qb.Where(sq.Eq{"cr.crypt_id": filter.CryptID})
+	}
 	if filter.Service != "" {
 		qb = qb.Where("cv.service LIKE ?", fmt.Sprintf("%%%s%%", filter.Service))
 	}
@@ -207,6 +206,7 @@ func (r *DbRepo) parseCredential(row *sql.Rows) (*repos.Credential, error) {
 		&encryptedPwd,
 		&cred.Description,
 		&encryptedDetails,
+		&cred.Version,
 	)
 	if err != nil {
 		return nil, err
@@ -338,12 +338,132 @@ func (r *DbRepo) InsertCredential(ctx context.Context, cryptID string, cred *rep
 		return nil, err
 	}
 
-	creds, err := r.QueryCredentials(ctx, QueryCredentialsFilter{CryptID: cryptID, ID: cred.ID})
+	creds, err := r.QueryCredentials(ctx, QueryCredentialsFilter{ID: cred.ID})
 	if err != nil {
 		return nil, err
 	}
 	if len(creds) != 1 {
 		return nil, errors.New("failed to insert credential")
+	}
+
+	return creds[0], nil
+}
+
+/******************************************************************************/
+
+func (r *DbRepo) getLatestCredentialVersion(ctx context.Context, id string) (int, error) {
+	var latestVersion int
+	err := sq.Select("latest_version").
+		From("credentials").
+		Where(sq.Eq{"id": id}).
+		RunWith(r.db).
+		QueryRowContext(ctx).
+		Scan(&latestVersion)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return latestVersion, nil
+}
+
+func (r *DbRepo) UpdateCredential(ctx context.Context, cred *repos.Credential) (*repos.Credential, error) {
+	if cred.ID == "" {
+		return nil, errors.New("credential id is required")
+	}
+
+	latestVersion, err := r.getLatestCredentialVersion(ctx, cred.ID)
+	if err != nil {
+		return nil, err
+	}
+	nextVersion := latestVersion + 1
+
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	tagsJSON, err := mango.MarshalToString(cred.Tags)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = sq.Update("credentials").
+		Set("tags", tagsJSON).
+		Set("current_version", nextVersion).
+		Set("latest_version", nextVersion).
+		RunWith(tx).
+		Where(sq.Eq{"id": cred.ID}).
+		ExecContext(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	domainsJSON, err := mango.MarshalToString(cred.Domains)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	encryptedPwd, err := r.cipher.Encrypt(cred.Password)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	detailsJSON, err := mango.MarshalToString(cred.Details)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	encryptedDetails, err := r.cipher.Encrypt(detailsJSON)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	_, err = sq.Insert("credential_versions").
+		Columns(
+			"credential_id",
+			"version",
+			"service",
+			"domains",
+			"email",
+			"username",
+			"s_password",
+			"description",
+			"s_details",
+		).
+		Values(
+			cred.ID,
+			nextVersion,
+			cred.Service,
+			domainsJSON,
+			cred.Email,
+			cred.Username,
+			encryptedPwd,
+			cred.Description,
+			encryptedDetails,
+		).
+		RunWith(tx).
+		ExecContext(ctx)
+
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	creds, err := r.QueryCredentials(ctx, QueryCredentialsFilter{ID: cred.ID})
+	if err != nil {
+		return nil, err
+	}
+	if len(creds) != 1 {
+		return nil, errors.New("failed to update credential")
 	}
 
 	return creds[0], nil

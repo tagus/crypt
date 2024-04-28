@@ -135,8 +135,50 @@ func TestDbRepo_CreateCredential(t *testing.T) {
 	require.Equal(t, "password", cred.Password)
 	require.Equal(t, "description", cred.Description)
 	require.Equal(t, []string{"tag-1", "tag-2"}, cred.Tags)
+	require.Equal(t, 1, cred.Version)
 
 	require.Len(t, cred.Details.SecurityQuestions, 1)
 	require.Equal(t, cred.Details.SecurityQuestions[0].Question, "question")
 	require.Equal(t, cred.Details.SecurityQuestions[0].Answer, "answer")
+}
+
+func TestDbRepo_UpdateCredential(t *testing.T) {
+	defer resetDB()
+
+	ctx := context.TODO()
+	crypt, err := repo.InsertCrypt(ctx, &repos.Crypt{
+		ID:   "test-crypt-1",
+		Name: "default_crypt",
+	})
+	require.NoError(t, err)
+
+	cred, err := repo.InsertCredential(ctx, crypt.ID, &repos.Credential{
+		ID:          "credential-1",
+		Service:     "test-service",
+		Domains:     []string{"domain-1", "domain-2"},
+		Email:       "test@test.com",
+		Username:    "username",
+		Password:    "password",
+		Description: "description",
+		Details: &repos.Details{
+			SecurityQuestions: []repos.SecurityQuestion{
+				{
+					Question: "question",
+					Answer:   "answer",
+				},
+			},
+		},
+		Tags: []string{"tag-1", "tag-2"},
+	})
+	require.NoError(t, err)
+	require.Equal(t, "credential-1", cred.ID)
+	require.Equal(t, "test-service", cred.Service)
+	require.Equal(t, "password", cred.Password)
+	require.Equal(t, 1, cred.Version)
+
+	cred.Password = "new-password"
+	cred, err = repo.UpdateCredential(ctx, cred)
+	require.NoError(t, err)
+	require.Equal(t, "new-password", cred.Password)
+	require.Equal(t, 2, cred.Version)
 }

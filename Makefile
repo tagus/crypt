@@ -15,4 +15,7 @@ install: crypt
 clean:
 	rm -f crypt
 
-.PHONY: clean crypt test install
+tidy:
+	go mod tidy
+
+.PHONY: clean crypt test install tidy

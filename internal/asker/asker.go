@@ -6,10 +6,12 @@ import (
 	"strings"
 
 	"github.com/manifoldco/promptui"
+	"github.com/tagus/mango"
 )
 
 var (
-	ErrInterrupt = errors.New("interrupted through signal")
+	ErrInterrupt    = errors.New("interrupted through signal")
+	confirmKeywords = mango.NewSet("si", "y", "ack", "yup", "ok", "yes")
 )
 
 // Asker is a helper for retrieving user input from the given reader
@@ -72,29 +74,13 @@ func (a *Asker) AskConfirm(question string) (bool, error) {
 		IsVimMode: a.IsVimMode,
 	}
 
-	// TODO: parse response
 	res, err := prompt.Run()
 	if err != nil {
 		return false, err
 	}
 
 	res = strings.ToLower(res)
-	switch res {
-	case "si":
-		fallthrough
-	case "y":
-		fallthrough
-	case "ack":
-		fallthrough
-	case "yup":
-		fallthrough
-	case "ok":
-		fallthrough
-	case "yes":
-		return true, nil
-	default:
-		return false, nil
-	}
+	return confirmKeywords.Has(res), nil
 }
 
 // AskSecret asks for user input without echoing input back to terminal.

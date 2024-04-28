@@ -27,8 +27,8 @@ type Cipher interface {
 //go:embed schema.sql
 var schema string
 
-// Initialize will enure that the corresponding sqlite file contains the crypt tables
-func Intialize(ctx context.Context, path string, cipher Cipher) (*DbRepo, error) {
+// Initialize will ensure that the corresponding sqlite file contains the crypt tables
+func Initialize(ctx context.Context, path string, cipher Cipher) (*DbRepo, error) {
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
 		return nil, err
@@ -37,10 +37,10 @@ func Intialize(ctx context.Context, path string, cipher Cipher) (*DbRepo, error)
 		return nil, err
 	}
 
-	return intialize(ctx, cipher, db)
+	return initialize(ctx, cipher, db)
 }
 
-func intialize(ctx context.Context, cipher Cipher, db *sql.DB) (*DbRepo, error) {
+func initialize(ctx context.Context, cipher Cipher, db *sql.DB) (*DbRepo, error) {
 	if _, err := db.ExecContext(ctx, schema); err != nil {
 		return nil, err
 	}
@@ -52,12 +52,7 @@ func intialize(ctx context.Context, cipher Cipher, db *sql.DB) (*DbRepo, error) 
 
 /******************************************************************************/
 
-type QueryCryptsFilter struct {
-	Name string
-	ID   string
-}
-
-func (r *DbRepo) QueryCrypts(ctx context.Context, filter QueryCryptsFilter) ([]*repos.Crypt, error) {
+func (r *DbRepo) QueryCrypts(ctx context.Context, filter repos.QueryCryptsFilter) ([]*repos.Crypt, error) {
 	qb := sq.Select(
 		"id",
 		"name",
@@ -65,6 +60,7 @@ func (r *DbRepo) QueryCrypts(ctx context.Context, filter QueryCryptsFilter) ([]*
 		"created_at",
 	).
 		From("crypts").
+		Where(sq.Eq{"archived_at": nil}).
 		RunWith(r.db)
 
 	if filter.Name != "" {
@@ -113,7 +109,7 @@ func (r *DbRepo) InsertCrypt(ctx context.Context, crypt *repos.Crypt) (*repos.Cr
 		return nil, err
 	}
 
-	crypts, err := r.QueryCrypts(ctx, QueryCryptsFilter{
+	crypts, err := r.QueryCrypts(ctx, repos.QueryCryptsFilter{
 		ID: crypt.ID,
 	})
 	if err != nil {
@@ -128,13 +124,7 @@ func (r *DbRepo) InsertCrypt(ctx context.Context, crypt *repos.Crypt) (*repos.Cr
 
 /******************************************************************************/
 
-type QueryCredentialsFilter struct {
-	ID      string
-	CryptID string
-	Service string
-}
-
-func (r *DbRepo) QueryCredentials(ctx context.Context, filter QueryCredentialsFilter) ([]*repos.Credential, error) {
+func (r *DbRepo) QueryCredentials(ctx context.Context, filter repos.QueryCredentialsFilter) ([]*repos.Credential, error) {
 	qb := sq.Select(
 		"cr.id",
 		"cr.tags",
@@ -153,6 +143,7 @@ func (r *DbRepo) QueryCredentials(ctx context.Context, filter QueryCredentialsFi
 	).
 		From("credentials AS cr").
 		InnerJoin("credential_versions AS cv ON cr.id = cv.credential_id AND cr.current_version = cv.version").
+		Where(sq.Eq{"cr.archived_at": nil}).
 		RunWith(r.db)
 
 	if filter.CryptID != "" {
@@ -338,7 +329,7 @@ func (r *DbRepo) InsertCredential(ctx context.Context, cryptID string, cred *rep
 		return nil, err
 	}
 
-	creds, err := r.QueryCredentials(ctx, QueryCredentialsFilter{ID: cred.ID})
+	creds, err := r.QueryCredentials(ctx, repos.QueryCredentialsFilter{ID: cred.ID})
 	if err != nil {
 		return nil, err
 	}
@@ -458,7 +449,7 @@ func (r *DbRepo) UpdateCredential(ctx context.Context, cred *repos.Credential) (
 		return nil, err
 	}
 
-	creds, err := r.QueryCredentials(ctx, QueryCredentialsFilter{ID: cred.ID})
+	creds, err := r.QueryCredentials(ctx, repos.QueryCredentialsFilter{ID: cred.ID})
 	if err != nil {
 		return nil, err
 	}

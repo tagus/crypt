@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tagus/crypt/internal/cipher/passthroughcipher"
+	"github.com/tagus/crypt/internal/ciphers/passthroughcipher"
 	"github.com/tagus/crypt/internal/repos"
 	"github.com/tagus/mango"
 
@@ -21,16 +21,16 @@ var (
 
 func TestMain(m *testing.M) {
 	var err error
-	db, err = sql.Open("sqlite3", "./dbkhajarepo_test.db")
+	db, err = sql.Open("sqlite3", "./dbrepo_test.db")
 	mango.FatalIf(err)
 
 	ctx := context.TODO()
-	repo, err = intialize(ctx, passthroughcipher.New(), db)
+	repo, err = initialize(ctx, passthroughcipher.New(), db)
 	mango.FatalIf(err)
 
 	resetDB()
 	exitCode := m.Run()
-	mango.FatalIf(os.Remove("./dbkhajarepo_test.db"))
+	mango.FatalIf(os.Remove("./dbrepo_test.db"))
 	os.Exit(exitCode)
 }
 
@@ -59,23 +59,23 @@ func TestDbRepo_QueryCrypts(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	crypts, err := repo.QueryCrypts(ctx, QueryCryptsFilter{})
+	crypts, err := repo.QueryCrypts(ctx, repos.QueryCryptsFilter{})
 	require.NoError(t, err)
 	require.Len(t, crypts, 2)
 
-	crypts, err = repo.QueryCrypts(ctx, QueryCryptsFilter{
+	crypts, err = repo.QueryCrypts(ctx, repos.QueryCryptsFilter{
 		ID: "test-crypt-1",
 	})
 	require.NoError(t, err)
 	require.Len(t, crypts, 1)
 
-	crypts, err = repo.QueryCrypts(ctx, QueryCryptsFilter{
+	crypts, err = repo.QueryCrypts(ctx, repos.QueryCryptsFilter{
 		Name: "alt_crypt",
 	})
 	require.NoError(t, err)
 	require.Len(t, crypts, 1)
 
-	crypts, err = repo.QueryCrypts(ctx, QueryCryptsFilter{
+	crypts, err = repo.QueryCrypts(ctx, repos.QueryCryptsFilter{
 		Name: "alt_crypt_2",
 	})
 	require.NoError(t, err)

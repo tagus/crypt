@@ -97,7 +97,7 @@ func (a *Asker) AskSecret(question string, confirm bool, validations ...Validati
 
 	res, err := ask.Run()
 	if err != nil {
-		if err == promptui.ErrEOF || err == promptui.ErrInterrupt {
+		if errors.Is(err, promptui.ErrEOF) || errors.Is(err, promptui.ErrInterrupt) {
 			return "", ErrInterrupt
 		}
 		return "", err

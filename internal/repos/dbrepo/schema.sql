@@ -2,9 +2,10 @@ PRAGMA encoding = "UTF-8";
 
 CREATE TABLE IF NOT EXISTS crypts (
     id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
+    name TEXT NOT NULL UNIQUE,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    total_active_credentials INTEGER NOT NULL DEFAULT 0,
     archived_at TIMESTAMP
 );
 
@@ -19,7 +20,7 @@ CREATE TABLE IF NOT EXISTS credentials (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     archived_at TIMESTAMP,
     accessed_at TIMESTAMP,
-    accessed_count INTEGER NOT NULL,
+    accessed_count INTEGER NOT NULL DEFAULT 0,
     crypt_id TEXT NOT NULL
 );
 

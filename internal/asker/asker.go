@@ -25,7 +25,7 @@ type Asker struct {
 // Validation defines a general validation processor for a given string
 type Validation func(string) error
 
-// DefaultAsker creates a asker using STDOUT and STDIN
+// DefaultAsker creates an asker using STDOUT and STDIN
 func DefaultAsker() *Asker {
 	return &Asker{
 		Mask:      '*',

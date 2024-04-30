@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/tagus/crypt/internal/ciphers"
+	"time"
 
 	_ "embed"
 
@@ -15,20 +17,15 @@ import (
 )
 
 type DbRepo struct {
-	cipher Cipher
+	cipher ciphers.Cipher
 	db     *sql.DB
-}
-
-type Cipher interface {
-	Encrypt(string) ([]byte, error)
-	Decrypt([]byte) (string, error)
 }
 
 //go:embed schema.sql
 var schema string
 
 // Initialize will ensure that the corresponding sqlite file contains the crypt tables
-func Initialize(ctx context.Context, path string, cipher Cipher) (*DbRepo, error) {
+func Initialize(ctx context.Context, path string, cipher ciphers.Cipher) (*DbRepo, error) {
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
 		return nil, err
@@ -40,7 +37,7 @@ func Initialize(ctx context.Context, path string, cipher Cipher) (*DbRepo, error
 	return initialize(ctx, cipher, db)
 }
 
-func initialize(ctx context.Context, cipher Cipher, db *sql.DB) (*DbRepo, error) {
+func initialize(ctx context.Context, cipher ciphers.Cipher, db *sql.DB) (*DbRepo, error) {
 	if _, err := db.ExecContext(ctx, schema); err != nil {
 		return nil, err
 	}
@@ -58,6 +55,7 @@ func (r *DbRepo) QueryCrypts(ctx context.Context, filter repos.QueryCryptsFilter
 		"name",
 		"updated_at",
 		"created_at",
+		"total_active_credentials",
 	).
 		From("crypts").
 		Where(sq.Eq{"archived_at": nil}).
@@ -90,7 +88,7 @@ func (r *DbRepo) QueryCrypts(ctx context.Context, filter repos.QueryCryptsFilter
 func (r *DbRepo) parseCrypt(row *sql.Rows) (*repos.Crypt, error) {
 	var crypt repos.Crypt
 
-	err := row.Scan(&crypt.ID, &crypt.Name, &crypt.UpdatedAt, &crypt.CreatedAt)
+	err := row.Scan(&crypt.ID, &crypt.Name, &crypt.UpdatedAt, &crypt.CreatedAt, &crypt.TotalActiveCredentials)
 	if err != nil {
 		return nil, err
 	}
@@ -325,6 +323,18 @@ func (r *DbRepo) InsertCredential(ctx context.Context, cryptID string, cred *rep
 		return nil, err
 	}
 
+	_, err = sq.Update("crypts").
+		Set("updated_at", time.Now()).
+		Set("total_active_credentials", sq.Expr("total_active_credentials + 1")).
+		RunWith(tx).
+		Where(sq.Eq{"id": cryptID}).
+		ExecContext(ctx)
+
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
@@ -358,7 +368,7 @@ func (r *DbRepo) getLatestCredentialVersion(ctx context.Context, id string) (int
 	return latestVersion, nil
 }
 
-func (r *DbRepo) UpdateCredential(ctx context.Context, cred *repos.Credential) (*repos.Credential, error) {
+func (r *DbRepo) UpdateCredential(ctx context.Context, cryptID string, cred *repos.Credential) (*repos.Credential, error) {
 	if cred.ID == "" {
 		return nil, errors.New("credential id is required")
 	}
@@ -438,6 +448,17 @@ func (r *DbRepo) UpdateCredential(ctx context.Context, cred *repos.Credential) (
 			encryptedDetails,
 		).
 		RunWith(tx).
+		ExecContext(ctx)
+
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	_, err = sq.Update("crypts").
+		Set("updated_at", time.Now()).
+		RunWith(tx).
+		Where(sq.Eq{"id": cryptID}).
 		ExecContext(ctx)
 
 	if err != nil {

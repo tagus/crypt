@@ -1,7 +1,7 @@
 package main
 
-import "github.com/tagus/crypt/internal/cobracli"
+import "github.com/tagus/crypt/internal/cli"
 
 func main() {
-	cobracli.Execute()
+	cli.Execute()
 }

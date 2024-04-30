@@ -177,7 +177,7 @@ func TestDbRepo_UpdateCredential(t *testing.T) {
 	require.Equal(t, 1, cred.Version)
 
 	cred.Password = "new-password"
-	cred, err = repo.UpdateCredential(ctx, cred)
+	cred, err = repo.UpdateCredential(ctx, crypt.ID, cred)
 	require.NoError(t, err)
 	require.Equal(t, "new-password", cred.Password)
 	require.Equal(t, 2, cred.Version)

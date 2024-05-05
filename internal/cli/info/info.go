@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/cli/environment"
-	"github.com/tagus/crypt/internal/repos"
 	"github.com/tagus/crypt/internal/utils"
 	"strconv"
 )
@@ -31,16 +30,10 @@ func info(cmd *cobra.Command, args []string) error {
 	}
 
 	crypt := env.Crypt()
-	repo := env.Repo()
-
-	creds, err := repo.QueryCredentials(cmd.Context(), repos.QueryCredentialsFilter{CryptID: crypt.ID})
-	if err != nil {
-		return err
-	}
 
 	data := [][]string{
 		{"id", crypt.ID},
-		{"credentials", strconv.Itoa(len(creds))},
+		{"credentials", strconv.Itoa(crypt.TotalActiveCredentials)},
 		{"created at", crypt.CreatedAt.Format("01/02/2006")},
 		{"updated at", crypt.UpdatedAt.Format("01/02/2006")},
 	}

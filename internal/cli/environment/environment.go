@@ -113,3 +113,7 @@ func (e *Environment) Crypt() *repos.Crypt {
 func (e *Environment) Repo() repos.Repo {
 	return e.repo
 }
+
+func (e *Environment) Close() error {
+	return e.repo.Close()
+}

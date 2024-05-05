@@ -47,6 +47,10 @@ func initialize(ctx context.Context, cipher ciphers.Cipher, db *sql.DB) (*DbRepo
 	}, nil
 }
 
+func (r *DbRepo) Close() error {
+	return r.db.Close()
+}
+
 /******************************************************************************/
 
 func (r *DbRepo) QueryCrypts(ctx context.Context, filter repos.QueryCryptsFilter) ([]*repos.Crypt, error) {

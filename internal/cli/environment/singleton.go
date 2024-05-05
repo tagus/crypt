@@ -1,6 +1,8 @@
 package environment
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+)
 
 const (
 	CryptDBPathFlag = "crypt-db"

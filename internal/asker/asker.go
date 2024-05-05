@@ -10,7 +10,8 @@ import (
 )
 
 var (
-	ErrInterrupt    = errors.New("interrupted through signal")
+	ErrInterrupt = errors.New("interrupted through signal")
+
 	confirmKeywords = mango.NewSet("si", "y", "ack", "yup", "ok", "yes")
 )
 
@@ -104,25 +105,15 @@ func (a *Asker) AskSecret(question string, confirm bool, validations ...Validati
 	}
 
 	if confirm {
-		reAsk := promptui.Prompt{
-			Label: "confirm " + question,
-			Validate: func(val string) error {
-				if val != res {
-					return errors.New("confirmation does not match")
-				}
-				return nil
-			},
-			Stdin:     a.Stdin,
-			Stdout:    a.Stdout,
-			IsVimMode: a.IsVimMode,
-			Mask:      a.Mask,
-		}
-
-		_, err := reAsk.Run()
+		_, err = a.AskSecret("confirm "+question, false, func(val string) error {
+			if val != res {
+				return errors.New("confirmation does not match")
+			}
+			return nil
+		})
 		if err != nil {
 			return "", err
 		}
-
 	}
 
 	return sanitize(res), nil

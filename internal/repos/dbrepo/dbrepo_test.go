@@ -230,3 +230,47 @@ func TestDbRepo_UpdateCredential(t *testing.T) {
 	require.Equal(t, "new-password", cred.Password)
 	require.Equal(t, 2, cred.Version)
 }
+
+func TestDbRepo_QueryCredentialsWithIncrementAccessCountFlag(t *testing.T) {
+	defer resetDB()
+
+	ctx := context.TODO()
+	crypt, err := repo.InsertCrypt(ctx, &repos.Crypt{
+		ID:   "test-crypt-1",
+		Name: "default_crypt",
+	})
+	require.NoError(t, err)
+
+	cred, err := repo.InsertCredential(ctx, crypt.ID, &repos.Credential{
+		ID:          "credential-1",
+		Service:     "test-service",
+		Domains:     []string{"domain-1", "domain-2"},
+		Email:       "test@test.com",
+		Username:    "username",
+		Password:    "password",
+		Description: "description",
+		Details: &repos.Details{
+			SecurityQuestions: []repos.SecurityQuestion{
+				{
+					Question: "question",
+					Answer:   "answer",
+				},
+			},
+		},
+		Tags: []string{"tag-1", "tag-2"},
+	})
+	require.NoError(t, err)
+	require.Equal(t, 0, cred.AccessedCount)
+
+	creds, err := repo.QueryCredentials(ctx, repos.QueryCredentialsFilter{ID: cred.ID, IncrementAccessCount: true})
+	require.NoError(t, err)
+	require.Len(t, creds, 1)
+	require.Equal(t, 1, creds[0].AccessedCount)
+	require.NotNil(t, creds[0].AccessedAt)
+
+	newCreds, err := repo.QueryCredentials(ctx, repos.QueryCredentialsFilter{ID: cred.ID})
+	require.NoError(t, err)
+	require.Len(t, newCreds, 1)
+	require.Equal(t, creds[0].AccessedCount, newCreds[0].AccessedCount)
+	require.NotNil(t, newCreds[0].AccessedAt)
+}

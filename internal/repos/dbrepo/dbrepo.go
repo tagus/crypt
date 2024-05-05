@@ -127,6 +127,8 @@ func (r *DbRepo) InsertCrypt(ctx context.Context, crypt *repos.Crypt) (*repos.Cr
 /******************************************************************************/
 
 func (r *DbRepo) QueryCredentials(ctx context.Context, filter repos.QueryCredentialsFilter) ([]*repos.Credential, error) {
+	tx, err := r.db.BeginTx(ctx, nil)
+
 	qb := sq.Select(
 		"cr.id",
 		"cr.tags",
@@ -146,7 +148,7 @@ func (r *DbRepo) QueryCredentials(ctx context.Context, filter repos.QueryCredent
 		From("credentials AS cr").
 		InnerJoin("credential_versions AS cv ON cr.id = cv.credential_id AND cr.current_version = cv.version").
 		Where(sq.Eq{"cr.archived_at": nil}).
-		RunWith(r.db)
+		RunWith(tx)
 
 	if filter.CryptID != "" {
 		qb = qb.Where(sq.Eq{"cr.crypt_id": filter.CryptID})
@@ -160,6 +162,7 @@ func (r *DbRepo) QueryCredentials(ctx context.Context, filter repos.QueryCredent
 
 	rows, err := qb.QueryContext(ctx)
 	if err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 
@@ -167,9 +170,36 @@ func (r *DbRepo) QueryCredentials(ctx context.Context, filter repos.QueryCredent
 	for rows.Next() {
 		cred, err := r.parseCredential(rows)
 		if err != nil {
+			tx.Rollback()
 			return nil, err
 		}
 		creds = append(creds, cred)
+	}
+
+	if filter.IncrementAccessCount {
+		ts := time.Now()
+		ids := mango.Map(creds, func(cred *repos.Credential) string { return cred.ID })
+
+		_, err = sq.Update("credentials").
+			Set("accessed_at", ts).
+			Set("accessed_count", sq.Expr("accessed_count + 1")).
+			Where(sq.Eq{"id": ids}).
+			RunWith(tx).
+			ExecContext(ctx)
+
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+
+		for _, cred := range creds {
+			cred.AccessedAt = &ts
+			cred.AccessedCount += 1
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
 	}
 
 	return creds, nil
@@ -219,6 +249,10 @@ func (r *DbRepo) parseCredential(row *sql.Rows) (*repos.Credential, error) {
 	}
 	if tags != nil {
 		cred.Tags = *tags
+	}
+
+	if accessedAt.Valid {
+		cred.AccessedAt = &accessedAt.Time
 	}
 
 	cred.Password, err = r.cipher.Decrypt(encryptedPwd)

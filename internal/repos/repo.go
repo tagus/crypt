@@ -8,9 +8,10 @@ type QueryCryptsFilter struct {
 }
 
 type QueryCredentialsFilter struct {
-	ID      string
-	CryptID string
-	Service string
+	ID                   string
+	CryptID              string
+	Service              string
+	IncrementAccessCount bool
 }
 
 type Repo interface {

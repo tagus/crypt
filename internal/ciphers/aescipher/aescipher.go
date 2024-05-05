@@ -30,9 +30,11 @@ func New(pwd string) (*AESCipher, error) {
 }
 
 func (c *AESCipher) Encrypt(payload string) ([]byte, error) {
-	signed := ciphers.SignMessage(payload, c.key[:])
+	data, err := ciphers.SignMessage(payload, c.key[:])
+	if err != nil {
+		return nil, err
+	}
 
-	data := []byte(signed)
 	enc := make([]byte, aes.BlockSize+len(data))
 	iv := enc[:aes.BlockSize]
 
@@ -57,5 +59,5 @@ func (c *AESCipher) Decrypt(buf []byte) (string, error) {
 	stream := cipher.NewCFBDecrypter(c.block, iv)
 	stream.XORKeyStream(dec, dec)
 
-	return ciphers.DecodeMessage(string(dec), c.key[:])
+	return ciphers.DecodeMessage(dec, c.key[:])
 }

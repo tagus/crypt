@@ -98,7 +98,7 @@ func TestDbRepo_CreateCrypt(t *testing.T) {
 	require.NotEmpty(t, crypt.UpdatedAt)
 }
 
-func TestDbRepo_CreateCredential(t *testing.T) {
+func TestDbRepo_InsertCredential(t *testing.T) {
 	defer resetDB()
 
 	ctx := context.TODO()
@@ -140,6 +140,54 @@ func TestDbRepo_CreateCredential(t *testing.T) {
 	require.Len(t, cred.Details.SecurityQuestions, 1)
 	require.Equal(t, cred.Details.SecurityQuestions[0].Question, "question")
 	require.Equal(t, cred.Details.SecurityQuestions[0].Answer, "answer")
+}
+
+func TestDbRepo_InsertCredentialWithoutID(t *testing.T) {
+	defer resetDB()
+
+	ctx := context.TODO()
+	crypt, err := repo.InsertCrypt(ctx, &repos.Crypt{
+		ID:   "test-crypt-1",
+		Name: "default_crypt",
+	})
+	require.NoError(t, err)
+
+	_, err = repo.InsertCredential(ctx, crypt.ID, &repos.Credential{
+		Service:     "test-service",
+		Domains:     nil,
+		Email:       "test@test.com",
+		Username:    "username",
+		Password:    "password",
+		Description: "description",
+		Details:     nil,
+		Tags:        nil,
+	})
+	require.Error(t, err)
+}
+
+func TestDbRepo_InsertCredentialWithNullValues(t *testing.T) {
+	defer resetDB()
+
+	ctx := context.TODO()
+	crypt, err := repo.InsertCrypt(ctx, &repos.Crypt{
+		ID:   "test-crypt-1",
+		Name: "default_crypt",
+	})
+	require.NoError(t, err)
+
+	cred, err := repo.InsertCredential(ctx, crypt.ID, &repos.Credential{
+		ID:          "credential-1",
+		Service:     "test-service",
+		Domains:     nil,
+		Email:       "test@test.com",
+		Username:    "username",
+		Password:    "password",
+		Description: "description",
+		Details:     nil,
+		Tags:        nil,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, cred)
 }
 
 func TestDbRepo_UpdateCredential(t *testing.T) {

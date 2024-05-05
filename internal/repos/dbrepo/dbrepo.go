@@ -209,13 +209,17 @@ func (r *DbRepo) parseCredential(row *sql.Rows) (*repos.Credential, error) {
 	if err != nil {
 		return nil, err
 	}
-	cred.Domains = *domains
+	if domains != nil {
+		cred.Domains = *domains
+	}
 
 	tags, err := mango.UnmarshalFromString[[]string](tagsJSON)
 	if err != nil {
 		return nil, err
 	}
-	cred.Tags = *tags
+	if tags != nil {
+		cred.Tags = *tags
+	}
 
 	cred.Password, err = r.cipher.Decrypt(encryptedPwd)
 	if err != nil {
@@ -238,6 +242,10 @@ func (r *DbRepo) parseCredential(row *sql.Rows) (*repos.Credential, error) {
 /******************************************************************************/
 
 func (r *DbRepo) InsertCredential(ctx context.Context, cryptID string, cred *repos.Credential) (*repos.Credential, error) {
+	if cred.ID == "" {
+		return nil, errors.New("credential id is required")
+	}
+
 	tagsJSON, err := mango.MarshalToString(cred.Tags)
 	if err != nil {
 		return nil, err

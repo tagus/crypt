@@ -28,6 +28,7 @@ func info(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	defer env.Close()
 
 	crypt := env.Crypt()
 

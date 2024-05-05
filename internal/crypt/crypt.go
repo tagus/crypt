@@ -7,9 +7,6 @@ import (
 	"github.com/teris-io/shortid"
 )
 
-// Version represents the current version of the cryptfile + cli
-const Version = "v1.12.0"
-
 type Credentials map[string]*Credential
 
 // Crypt represents contents of a crypt file
@@ -85,7 +82,7 @@ func (c *Crypt) GetUpdatedAt() time.Time {
 }
 
 func (c *Crypt) GetJSON() ([]byte, error) {
-	c.Version = Version
+	//c.Version = Version
 	str, err := json.Marshal(c)
 	if err != nil {
 		return nil, err

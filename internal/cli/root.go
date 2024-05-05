@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/asker"
+	"github.com/tagus/crypt/internal/cli/add"
 	"github.com/tagus/crypt/internal/cli/environment"
 	"github.com/tagus/crypt/internal/cli/info"
 	"github.com/tagus/mango"
@@ -48,6 +49,7 @@ func Execute() {
 
 	// adding all subcommands
 	rootCmd.AddCommand(info.Command)
+	rootCmd.AddCommand(add.Command)
 
 	if err := rootCmd.Execute(); err != nil {
 		if errors.Is(err, asker.ErrInterrupt) {

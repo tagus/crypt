@@ -1,8 +1,10 @@
 package show
 
 import (
+	"errors"
 	"fmt"
 
+	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/asker"
 	"github.com/tagus/crypt/internal/cli/cutils"
@@ -59,6 +61,11 @@ func show(cmd *cobra.Command, args []string) error {
 	}
 
 	utils.PrintCredential(cred)
+
+	if err := clipboard.WriteAll(cred.Password); err != nil {
+		return errors.New("failed to copy pwd")
+	}
+	mango.Debug("copied password to clipboard")
 
 	return nil
 }

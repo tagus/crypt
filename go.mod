@@ -18,6 +18,7 @@ require (
 
 require (
 	github.com/RoaringBitmap/roaring v1.2.2 // indirect
+	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/bits-and-blooms/bitset v1.4.0 // indirect
 	github.com/blevesearch/bleve_index_api v1.0.5 // indirect
 	github.com/blevesearch/geo v0.1.17 // indirect

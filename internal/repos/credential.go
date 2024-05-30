@@ -1,6 +1,9 @@
 package repos
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type Credential struct {
 	ID            string     `json:"id"`
@@ -20,7 +23,7 @@ type Credential struct {
 }
 
 func (c *Credential) String() string {
-	return c.Service
+	return fmt.Sprintf("%s / %s", c.ID, c.Service)
 }
 
 type Details struct {

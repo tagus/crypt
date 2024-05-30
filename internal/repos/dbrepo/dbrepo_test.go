@@ -309,6 +309,81 @@ func TestDbRepo_QueryCredentialsWithIncrementAccessCountFlag(t *testing.T) {
 	require.NotNil(t, newCreds[0].AccessedAt)
 }
 
+func TestDbRepo_QueryCredentials(t *testing.T) {
+	defer resetDB()
+
+	ctx := context.TODO()
+	crypt, err := repo.InsertCrypt(ctx, &repos.Crypt{
+		ID:             "test-crypt-1",
+		Name:           "default_crypt",
+		HashedPassword: []byte("hashed_password"),
+		Signature:      []byte("signature"),
+	})
+	require.NoError(t, err)
+
+	ci := passthroughcipher.New()
+	cred, err := repo.InsertCredential(ctx, ci, crypt.ID, &repos.Credential{
+		ID:          "credential-1",
+		Service:     "test-service",
+		Domains:     []string{"domain-1", "domain-2"},
+		Email:       "test@test.com",
+		Username:    "username",
+		Password:    "password",
+		Description: "description",
+		Details: &repos.Details{
+			SecurityQuestions: []repos.SecurityQuestion{
+				{
+					Question: "question",
+					Answer:   "answer",
+				},
+			},
+		},
+		Tags: []string{"tag-1", "tag-2"},
+	})
+	require.NoError(t, err)
+	require.Equal(t, 0, cred.AccessedCount)
+
+	_, err = repo.InsertCredential(ctx, ci, crypt.ID, &repos.Credential{
+		ID:          "credential-2",
+		Service:     "test-service-2",
+		Domains:     []string{"domain-1", "domain-2"},
+		Email:       "test@test.com",
+		Username:    "username",
+		Password:    "password",
+		Description: "description",
+		Details: &repos.Details{
+			SecurityQuestions: []repos.SecurityQuestion{
+				{
+					Question: "question",
+					Answer:   "answer",
+				},
+			},
+		},
+		Tags: []string{"tag-2", "tag-3"},
+	})
+	require.NoError(t, err)
+
+	creds, err := repo.QueryCredentials(ctx, ci, repos.QueryCredentialsFilter{})
+	require.NoError(t, err)
+	require.Len(t, creds, 2)
+
+	creds, err = repo.QueryCredentials(ctx, ci, repos.QueryCredentialsFilter{Tag: "tag-3"})
+	require.NoError(t, err)
+	require.Len(t, creds, 1)
+
+	creds, err = repo.QueryCredentials(ctx, ci, repos.QueryCredentialsFilter{Tag: "tag-2"})
+	require.NoError(t, err)
+	require.Len(t, creds, 2)
+
+	creds, err = repo.QueryCredentials(
+		ctx,
+		ci,
+		repos.QueryCredentialsFilter{Tag: "tag-2", Limit: 1},
+	)
+	require.NoError(t, err)
+	require.Len(t, creds, 1)
+}
+
 func TestDbRepo_ArchiveCredential(t *testing.T) {
 	defer resetDB()
 

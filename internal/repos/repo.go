@@ -10,4 +10,6 @@ type QueryCredentialsFilter struct {
 	CryptID              string
 	Service              string
 	IncrementAccessCount bool
+	Limit                int
+	Tag                  string
 }

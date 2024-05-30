@@ -148,6 +148,7 @@ func (r *DbRepo) QueryCredentials(ctx context.Context, ci ciphers.Cipher, filter
 		From("credentials AS cr").
 		InnerJoin("credential_versions AS cv ON cr.id = cv.credential_id AND cr.current_version = cv.version").
 		Where(sq.Eq{"cr.archived_at": nil}).
+		OrderBy("cr.accessed_at DESC").
 		RunWith(tx)
 
 	if filter.CryptID != "" {
@@ -158,6 +159,12 @@ func (r *DbRepo) QueryCredentials(ctx context.Context, ci ciphers.Cipher, filter
 	}
 	if filter.ID != "" {
 		qb = qb.Where(sq.Eq{"cr.id": filter.ID})
+	}
+	if filter.Limit > 0 {
+		qb = qb.Limit(uint64(filter.Limit))
+	}
+	if filter.Tag != "" {
+		qb = qb.Where("EXISTS (SELECT 1 FROM json_each(cr.tags) WHERE json_each.value = ?)", filter.Tag)
 	}
 
 	rows, err := qb.QueryContext(ctx)
@@ -385,7 +392,7 @@ func (r *DbRepo) InsertCredential(ctx context.Context, ci ciphers.Cipher, cryptI
 		return nil, err
 	}
 
-	creds, err := r.QueryCredentials(ctx, ci, repos.QueryCredentialsFilter{ID: cred.ID})
+	creds, err := r.QueryCredentials(ctx, ci, repos.QueryCredentialsFilter{ID: cred.ID, CryptID: cryptID})
 	if err != nil {
 		return nil, err
 	}

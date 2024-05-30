@@ -14,7 +14,7 @@ var Command = &cobra.Command{
 	Use:     "add [service]",
 	Short:   "add a service to crypt",
 	Long:    `add a service along with any associated information to the crypt`,
-	Args:    cutils.ServiceIsNew,
+	Args:    cutils.ServiceMaybeNew,
 	Example: "add Amazon Web Services",
 	RunE:    add,
 }

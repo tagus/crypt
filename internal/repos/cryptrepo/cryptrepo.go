@@ -3,43 +3,20 @@ package cryptrepo
 import (
 	"context"
 
+	"github.com/tagus/crypt/internal/repos/dbrepo"
+
 	"github.com/tagus/crypt/internal/ciphers"
 	"github.com/tagus/crypt/internal/repos"
 )
 
-type Repo interface {
-	QueryCredentials(
-		ctx context.Context,
-		ci ciphers.Cipher,
-		filter repos.QueryCredentialsFilter,
-	) ([]*repos.Credential, error)
-	InsertCredential(
-		ctx context.Context,
-		ci ciphers.Cipher,
-		cryptID string,
-		cred *repos.Credential,
-	) (*repos.Credential, error)
-	UpdateCredential(
-		ctx context.Context,
-		ci ciphers.Cipher,
-		cryptID string,
-		cred *repos.Credential,
-	) (*repos.Credential, error)
-	AccessCredential(
-		ctx context.Context,
-		ci ciphers.Cipher,
-		cryptID, credID string,
-	) (*repos.Credential, error)
-}
-
 // CryptRepo scopes the underlying repo to the given crypt id and cipher
 type CryptRepo struct {
-	repo    Repo
+	repo    *dbrepo.DbRepo
 	cryptID string
 	ci      ciphers.Cipher
 }
 
-func New(repo Repo, cryptID string, ci ciphers.Cipher) *CryptRepo {
+func New(repo *dbrepo.DbRepo, cryptID string, ci ciphers.Cipher) *CryptRepo {
 	return &CryptRepo{
 		repo:    repo,
 		cryptID: cryptID,
@@ -74,4 +51,11 @@ func (c *CryptRepo) AccessCredential(
 	credID string,
 ) (*repos.Credential, error) {
 	return c.repo.AccessCredential(ctx, c.ci, c.cryptID, credID)
+}
+
+func (c *CryptRepo) ArchiveCredential(
+	ctx context.Context,
+	credID string,
+) error {
+	return c.repo.ArchiveCredential(ctx, credID)
 }

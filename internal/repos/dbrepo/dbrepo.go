@@ -539,3 +539,40 @@ func (r *DbRepo) AccessCredential(ctx context.Context, ci ciphers.Cipher, cryptI
 	}
 	return creds[0], nil
 }
+
+/******************************************************************************/
+
+func (r *DbRepo) ArchiveCredential(ctx context.Context, credID string) error {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	_, err = sq.Update("credentials").
+		Set("archived_at", time.Now()).
+		Where(sq.Eq{"id": credID}).
+		RunWith(tx).
+		ExecContext(ctx)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	_, err = sq.Update("crypts").
+		Set("updated_at", time.Now()).
+		RunWith(tx).
+		Where(sq.Eq{"id": credID}).
+		ExecContext(ctx)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
+}

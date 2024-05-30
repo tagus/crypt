@@ -22,6 +22,7 @@ var Command = &cobra.Command{
 	Short: "information about your crypt file",
 	Long:  `displays meta information about your crypt file.`,
 	RunE:  info,
+	Args:  cobra.NoArgs,
 }
 
 func info(cmd *cobra.Command, args []string) error {

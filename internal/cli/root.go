@@ -4,6 +4,8 @@ import (
 	"errors"
 	"os"
 
+	"github.com/tagus/crypt/internal/cli/archive"
+
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/asker"
 	"github.com/tagus/crypt/internal/cli/add"
@@ -53,6 +55,7 @@ func Execute() {
 	rootCmd.AddCommand(info.Command)
 	rootCmd.AddCommand(add.Command)
 	rootCmd.AddCommand(show.Command)
+	rootCmd.AddCommand(archive.Command)
 
 	if err := rootCmd.Execute(); err != nil {
 		if errors.Is(err, asker.ErrInterrupt) {

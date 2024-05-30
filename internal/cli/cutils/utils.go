@@ -2,15 +2,16 @@ package cutils
 
 import (
 	"errors"
-	"fmt"
+	"strings"
+
+	"github.com/tagus/mango"
+
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/cli/environment"
 	"github.com/tagus/crypt/internal/repos"
-	"strings"
 )
 
-// ServiceIsNew ensures that the given service does not already exist
-func ServiceIsNew(cmd *cobra.Command, args []string) error {
+func ServiceMaybeNew(cmd *cobra.Command, args []string) error {
 	svc, err := ParseService(cmd, args)
 	if err != nil {
 		return err
@@ -28,7 +29,7 @@ func ServiceIsNew(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(creds) > 0 {
-		return fmt.Errorf("service %s already exists", svc)
+		mango.Warningf("service %s might already exist", svc)
 	}
 	return nil
 }

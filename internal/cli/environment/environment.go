@@ -32,6 +32,7 @@ type CryptRepo interface {
 	InsertCredential(ctx context.Context, cred *repos.Credential) (*repos.Credential, error)
 	UpdateCredential(ctx context.Context, cred *repos.Credential) (*repos.Credential, error)
 	AccessCredential(ctx context.Context, credID string) (*repos.Credential, error)
+	ArchiveCredential(ctx context.Context, credID string) error
 }
 
 type InitStoreOpts struct {

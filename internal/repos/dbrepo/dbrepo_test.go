@@ -188,6 +188,10 @@ func TestDbRepo_InsertCredentialWithNullValues(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, cred)
+
+	var details *repos.Details
+	require.Len(t, cred.Domains, 0)
+	require.Equal(t, details, cred.Details)
 }
 
 func TestDbRepo_UpdateCredential(t *testing.T) {

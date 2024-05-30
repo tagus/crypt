@@ -10,7 +10,10 @@ const (
 	year = 365 * day
 )
 
-func FormatDate(ts time.Time) string {
+func FormatDate(ts *time.Time) string {
+	if ts == nil {
+		return "never"
+	}
 	return ts.Format("01-02-06")
 }
 

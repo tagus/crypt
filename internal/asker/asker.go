@@ -120,7 +120,7 @@ func (a *Asker) AskSecret(question string, confirm bool, validations ...Validati
 }
 
 // AskSelect prompts the user from a list of items and returns the index of the selected item
-func (a *Asker) AskSelect(question string, items []string) (int, error) {
+func (a *Asker) AskSelect(question string, items any) (int, error) {
 	ask := promptui.Select{
 		Label:  question,
 		Items:  items,

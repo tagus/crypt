@@ -526,3 +526,16 @@ func (r *DbRepo) UpdateCredential(ctx context.Context, cryptID string, cred *rep
 
 	return creds[0], nil
 }
+
+/******************************************************************************/
+
+func (r *DbRepo) AccessCredential(ctx context.Context, cryptID, credID string) (*repos.Credential, error) {
+	creds, err := r.QueryCredentials(ctx, repos.QueryCredentialsFilter{ID: credID, IncrementAccessCount: true})
+	if err != nil {
+		return nil, err
+	}
+	if len(creds) != 1 {
+		return nil, fmt.Errorf("no credential exists for id: %s", credID)
+	}
+	return creds[0], nil
+}

@@ -6,6 +6,7 @@ import (
 	"github.com/tagus/crypt/internal/repos"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/olekukonko/tablewriter"
@@ -89,8 +90,10 @@ func PrintCredential(cred *repos.Credential) {
 		{"service", getFallbackString(cred.Service)},
 		{"email", getFallbackString(cred.Email)},
 		{"username", getFallbackString(cred.Username)},
-		{"created_at", FormatDate(cred.CreatedAt)},
-		{"updated_at", FormatDate(cred.UpdatedAt)},
+		{"created_at", FormatDate(&cred.CreatedAt)},
+		{"updated_at", FormatDate(&cred.UpdatedAt)},
+		{"accessed_at", FormatDate(cred.AccessedAt)},
+		{"accessed_count", strconv.Itoa(cred.AccessedCount)},
 		{"tags", fmt.Sprintf("%v", cred.Tags)},
 	}
 

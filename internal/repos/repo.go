@@ -20,5 +20,6 @@ type Repo interface {
 	QueryCredentials(ctx context.Context, filter QueryCredentialsFilter) ([]*Credential, error)
 	InsertCredential(ctx context.Context, cryptID string, cred *Credential) (*Credential, error)
 	UpdateCredential(ctx context.Context, cryptID string, cred *Credential) (*Credential, error)
+	AccessCredential(ctx context.Context, cryptID, credID string) (*Credential, error)
 	Close() error
 }

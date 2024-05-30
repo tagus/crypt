@@ -19,6 +19,10 @@ type Credential struct {
 	Version       int        `json:"version"`
 }
 
+func (c *Credential) String() string {
+	return c.Service
+}
+
 type Details struct {
 	SecurityQuestions []SecurityQuestion `json:"security_questions"`
 }

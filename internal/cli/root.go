@@ -7,6 +7,7 @@ import (
 	"github.com/tagus/crypt/internal/cli/add"
 	"github.com/tagus/crypt/internal/cli/environment"
 	"github.com/tagus/crypt/internal/cli/info"
+	"github.com/tagus/crypt/internal/cli/show"
 	"github.com/tagus/mango"
 	"os"
 )
@@ -50,6 +51,7 @@ func Execute() {
 	// adding all subcommands
 	rootCmd.AddCommand(info.Command)
 	rootCmd.AddCommand(add.Command)
+	rootCmd.AddCommand(show.Command)
 
 	if err := rootCmd.Execute(); err != nil {
 		if errors.Is(err, asker.ErrInterrupt) {

@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS crypts (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     total_active_credentials INTEGER NOT NULL DEFAULT 0,
+    signature BLOB NOT NULL,
+    hashed_pwd BLOB NOT NULL,
     archived_at TIMESTAMP
 );
 

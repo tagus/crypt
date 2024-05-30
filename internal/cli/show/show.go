@@ -2,6 +2,7 @@ package show
 
 import (
 	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/asker"
 	"github.com/tagus/crypt/internal/cli/cutils"
@@ -31,11 +32,11 @@ func show(cmd *cobra.Command, args []string) error {
 	}
 	mango.Debug("show query:", svc)
 
-	var (
-		crypt = env.Crypt()
-		repo  = env.Repo()
+	repo := env.Repo()
+	creds, err := repo.QueryCredentials(
+		cmd.Context(),
+		repos.QueryCredentialsFilter{Service: svc},
 	)
-	creds, err := repo.QueryCredentials(cmd.Context(), repos.QueryCredentialsFilter{Service: svc, CryptID: crypt.ID})
 	if err != nil {
 		return err
 	}
@@ -52,7 +53,7 @@ func show(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	cred, err = repo.AccessCredential(cmd.Context(), crypt.ID, cred.ID)
+	cred, err = repo.AccessCredential(cmd.Context(), cred.ID)
 	if err != nil {
 		return err
 	}

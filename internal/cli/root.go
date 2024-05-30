@@ -2,6 +2,8 @@ package cli
 
 import (
 	"errors"
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/asker"
 	"github.com/tagus/crypt/internal/cli/add"
@@ -9,7 +11,6 @@ import (
 	"github.com/tagus/crypt/internal/cli/info"
 	"github.com/tagus/crypt/internal/cli/show"
 	"github.com/tagus/mango"
-	"os"
 )
 
 const Version = "v2.0.0"
@@ -46,7 +47,7 @@ func Execute() {
 		Bool(environment.CryptDBInitFlag, false, "whether to initialize the crypt db file if it doesn't exist")
 	rootCmd.
 		PersistentFlags().
-		StringP(environment.CryptNameFlag, "n", "default", "the crypt name")
+		StringP(environment.CryptNameFlag, "n", "main", "the crypt name")
 
 	// adding all subcommands
 	rootCmd.AddCommand(info.Command)

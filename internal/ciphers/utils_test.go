@@ -1,8 +1,9 @@
 package ciphers
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -55,4 +56,10 @@ func TestDecodeMessageWhenMessageHasChanged(t *testing.T) {
 	signedMessage[0] = 'A'
 	_, err = DecodeMessage(signedMessage, key)
 	assert.Error(t, err)
+}
+
+func TestComputeHashPwd(t *testing.T) {
+	hash, err := ComputeHashPwd("secret100")
+	require.NoError(t, err)
+	require.NotEmpty(t, hash)
 }

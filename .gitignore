@@ -4,7 +4,7 @@ tmp
 
 # test cryptfile used in development
 .dev*
-.*cryptfile
+*.*cryptfile
 *.db
 
 # outputs

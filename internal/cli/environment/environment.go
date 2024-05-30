@@ -3,6 +3,11 @@ package environment
 import (
 	"context"
 	"errors"
+	"os"
+	"path/filepath"
+
+	"github.com/tagus/crypt/internal/repos/cryptrepo"
+
 	"github.com/fatih/color"
 	"github.com/mitchellh/go-homedir"
 	"github.com/tagus/crypt/internal/asker"
@@ -11,13 +16,22 @@ import (
 	"github.com/tagus/crypt/internal/repos"
 	"github.com/tagus/crypt/internal/repos/dbrepo"
 	"github.com/tagus/mango"
-	"os"
-	"path/filepath"
 )
 
 type Environment struct {
-	repo  repos.Repo
+	repo  *dbrepo.DbRepo
+	cr    CryptRepo
 	crypt *repos.Crypt
+}
+
+type CryptRepo interface {
+	QueryCredentials(
+		ctx context.Context,
+		filter repos.QueryCredentialsFilter,
+	) ([]*repos.Credential, error)
+	InsertCredential(ctx context.Context, cred *repos.Credential) (*repos.Credential, error)
+	UpdateCredential(ctx context.Context, cred *repos.Credential) (*repos.Credential, error)
+	AccessCredential(ctx context.Context, credID string) (*repos.Credential, error)
 }
 
 type InitStoreOpts struct {
@@ -35,42 +49,59 @@ func initEnv(ctx context.Context, opts InitStoreOpts) (*Environment, error) {
 	}
 	mango.Debug("using crypt at: ", color.YellowString(path))
 
-	ci, err := initCipher()
+	repo, err := dbrepo.Initialize(ctx, path)
 	if err != nil {
 		return nil, err
 	}
 
-	repo, err := dbrepo.Initialize(ctx, path, ci)
-	if err != nil {
-		return nil, err
-	}
+	/******************************************************************************/
 
-	st := &Environment{repo: repo}
-
-	crypts, err := repo.QueryCrypts(ctx, repos.QueryCryptsFilter{Name: opts.CryptName})
-	if err != nil {
-		return nil, err
-	}
-	if len(crypts) != 1 {
-		crypt, err := repo.InsertCrypt(ctx, &repos.Crypt{ID: mango.ShortID(), Name: opts.CryptName})
-		if err != nil {
-			return nil, err
-		}
-		st.crypt = crypt
-	} else {
-		st.crypt = crypts[0]
-	}
-
-	return st, nil
-}
-
-func initCipher() (ciphers.Cipher, error) {
 	ak := asker.DefaultAsker()
 	pwd, err := ak.AskSecret(color.YellowString("pwd"), false)
 	if err != nil {
 		return nil, err
 	}
-	return aescipher.New(pwd)
+
+	var crypt *repos.Crypt
+	crypts, err := repo.QueryCrypts(ctx, repos.QueryCryptsFilter{Name: opts.CryptName})
+	if err != nil {
+		return nil, err
+	}
+	if len(crypts) != 1 {
+		signature := []byte(ciphers.ComputeHash(mango.ShortID()))
+		hashedPwd, err := ciphers.ComputeHashPwd(pwd)
+		if err != nil {
+			return nil, err
+		}
+		_crypt, err := repo.InsertCrypt(
+			ctx,
+			&repos.Crypt{
+				ID:             mango.ShortID(),
+				Name:           opts.CryptName,
+				HashedPassword: hashedPwd,
+				Signature:      signature,
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+		crypt = _crypt
+	} else {
+		crypt = crypts[0]
+	}
+
+	/******************************************************************************/
+
+	ci, err := aescipher.New(pwd, crypt.HashedPassword, crypt.Signature)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Environment{
+		repo:  repo,
+		cr:    cryptrepo.New(repo, crypt.ID, ci),
+		crypt: crypt,
+	}, nil
 }
 
 // resolveCryptDBPath determines the path of the crypt db to be used, the `crypt-db`
@@ -110,8 +141,8 @@ func (e *Environment) Crypt() *repos.Crypt {
 	return e.crypt
 }
 
-func (e *Environment) Repo() repos.Repo {
-	return e.repo
+func (e *Environment) Repo() CryptRepo {
+	return e.cr
 }
 
 func (e *Environment) Close() error {

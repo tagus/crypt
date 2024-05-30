@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"flag"
+	"os"
+	"time"
+
 	"github.com/fatih/color"
 	"github.com/tagus/crypt/internal/asker"
 	"github.com/tagus/crypt/internal/ciphers"
@@ -11,7 +14,6 @@ import (
 	"github.com/tagus/crypt/internal/repos"
 	"github.com/tagus/crypt/internal/repos/dbrepo"
 	"github.com/tagus/mango"
-	"os"
 )
 
 var (
@@ -33,23 +35,42 @@ func main() {
 	}
 	mango.Debug("sqlite db file path: ", *db)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-	ci, err := initCipher()
+	repo, err := dbrepo.Initialize(ctx, *db)
 	mango.FatalIf(err)
 
-	repo, err := dbrepo.Initialize(ctx, *db, ci)
+	/******************************************************************************/
+
+	// asking user for master password that will be used to decrypt the secure values
+	ak := asker.DefaultAsker()
+	pwd, err := ak.AskSecret(color.YellowString("pwd"), true)
 	mango.FatalIf(err)
+
+	signature := []byte(ciphers.ComputeHash(mango.ShortID()))
+	hashedPwd, err := ciphers.ComputeHashPwd(pwd)
+	mango.FatalIf(err)
+
+	ci, err := aescipher.New(pwd, hashedPwd, signature)
+	mango.FatalIf(err)
+
+	/******************************************************************************/
 
 	cr, err := parseCryptFile(*cp)
 	mango.FatalIf(err)
 
 	mango.Debug("importing crypt:", cr.Id)
-	newCrypt, err := getOrCreateCrypt(ctx, repo, cr, *name)
+	newCrypt, err := repo.InsertCrypt(
+		ctx,
+		&repos.Crypt{ID: cr.Id, Name: *name, HashedPassword: hashedPwd, Signature: signature},
+	)
 	mango.FatalIf(err)
 
+	/******************************************************************************/
+
 	for _, cred := range cr.Credentials {
-		newCred, err := repo.InsertCredential(ctx, newCrypt.ID, &repos.Credential{
+		newCred, err := repo.InsertCredential(ctx, ci, newCrypt.ID, &repos.Credential{
 			ID:          cred.Id,
 			Service:     cred.Service,
 			Email:       cred.Email,
@@ -66,27 +87,9 @@ func main() {
 		mango.Debug("imported service:", newCred.Service)
 	}
 
+	/******************************************************************************/
+
 	mango.Debug("import complete for crypt:", newCrypt.ID)
-}
-
-func getOrCreateCrypt(ctx context.Context, repo repos.Repo, cr *crypt.Crypt, name string) (*repos.Crypt, error) {
-	crypts, err := repo.QueryCrypts(ctx, repos.QueryCryptsFilter{ID: cr.Id})
-	if err != nil {
-		return nil, err
-	}
-	if len(crypts) != 1 {
-		return repo.InsertCrypt(ctx, &repos.Crypt{ID: cr.Id, Name: name})
-	}
-	return crypts[0], nil
-}
-
-func initCipher() (ciphers.Cipher, error) {
-	ak := asker.DefaultAsker()
-	pwd, err := ak.AskSecret(color.YellowString("pwd"), true)
-	if err != nil {
-		return nil, err
-	}
-	return aescipher.New(pwd)
 }
 
 func parseCryptFile(path string) (*crypt.Crypt, error) {

@@ -42,9 +42,8 @@ func add(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	crypt := env.Crypt()
 	repo := env.Repo()
-	cred, err = repo.InsertCredential(cmd.Context(), crypt.ID, cred)
+	cred, err = repo.InsertCredential(cmd.Context(), cred)
 	if err != nil {
 		return err
 	}

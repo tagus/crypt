@@ -2,10 +2,11 @@ package info
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/cli/environment"
 	"github.com/tagus/crypt/internal/utils"
-	"strconv"
 )
 
 var title = ` _______  ______    __   __  _______  _______
@@ -34,6 +35,7 @@ func info(cmd *cobra.Command, args []string) error {
 
 	data := [][]string{
 		{"id", crypt.ID},
+		{"name", crypt.Name},
 		{"credentials", strconv.Itoa(crypt.TotalActiveCredentials)},
 		{"created at", crypt.CreatedAt.Format("01/02/2006")},
 		{"updated at", crypt.UpdatedAt.Format("01/02/2006")},

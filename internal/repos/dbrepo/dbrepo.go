@@ -17,15 +17,14 @@ import (
 )
 
 type DbRepo struct {
-	cipher ciphers.Cipher
-	db     *sql.DB
+	db *sql.DB
 }
 
 //go:embed schema.sql
 var schema string
 
 // Initialize will ensure that the corresponding sqlite file contains the crypt tables
-func Initialize(ctx context.Context, path string, cipher ciphers.Cipher) (*DbRepo, error) {
+func Initialize(ctx context.Context, path string) (*DbRepo, error) {
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
 		return nil, err
@@ -34,16 +33,15 @@ func Initialize(ctx context.Context, path string, cipher ciphers.Cipher) (*DbRep
 		return nil, err
 	}
 
-	return initialize(ctx, cipher, db)
+	return initialize(ctx, db)
 }
 
-func initialize(ctx context.Context, cipher ciphers.Cipher, db *sql.DB) (*DbRepo, error) {
+func initialize(ctx context.Context, db *sql.DB) (*DbRepo, error) {
 	if _, err := db.ExecContext(ctx, schema); err != nil {
 		return nil, err
 	}
 	return &DbRepo{
-		db:     db,
-		cipher: cipher,
+		db: db,
 	}, nil
 }
 
@@ -60,6 +58,8 @@ func (r *DbRepo) QueryCrypts(ctx context.Context, filter repos.QueryCryptsFilter
 		"updated_at",
 		"created_at",
 		"total_active_credentials",
+		"hashed_pwd",
+		"signature",
 	).
 		From("crypts").
 		Where(sq.Eq{"archived_at": nil}).
@@ -92,7 +92,7 @@ func (r *DbRepo) QueryCrypts(ctx context.Context, filter repos.QueryCryptsFilter
 func (r *DbRepo) parseCrypt(row *sql.Rows) (*repos.Crypt, error) {
 	var crypt repos.Crypt
 
-	err := row.Scan(&crypt.ID, &crypt.Name, &crypt.UpdatedAt, &crypt.CreatedAt, &crypt.TotalActiveCredentials)
+	err := row.Scan(&crypt.ID, &crypt.Name, &crypt.UpdatedAt, &crypt.CreatedAt, &crypt.TotalActiveCredentials, &crypt.HashedPassword, &crypt.Signature)
 	if err != nil {
 		return nil, err
 	}
@@ -103,8 +103,8 @@ func (r *DbRepo) parseCrypt(row *sql.Rows) (*repos.Crypt, error) {
 
 func (r *DbRepo) InsertCrypt(ctx context.Context, crypt *repos.Crypt) (*repos.Crypt, error) {
 	qb := sq.Insert("crypts").
-		Columns("id", "name").
-		Values(crypt.ID, crypt.Name).
+		Columns("id", "name", "hashed_pwd", "signature").
+		Values(crypt.ID, crypt.Name, crypt.HashedPassword, crypt.Signature).
 		RunWith(r.db)
 
 	if _, err := qb.ExecContext(ctx); err != nil {
@@ -126,7 +126,7 @@ func (r *DbRepo) InsertCrypt(ctx context.Context, crypt *repos.Crypt) (*repos.Cr
 
 /******************************************************************************/
 
-func (r *DbRepo) QueryCredentials(ctx context.Context, filter repos.QueryCredentialsFilter) ([]*repos.Credential, error) {
+func (r *DbRepo) QueryCredentials(ctx context.Context, ci ciphers.Cipher, filter repos.QueryCredentialsFilter) ([]*repos.Credential, error) {
 	tx, err := r.db.BeginTx(ctx, nil)
 
 	qb := sq.Select(
@@ -168,7 +168,7 @@ func (r *DbRepo) QueryCredentials(ctx context.Context, filter repos.QueryCredent
 
 	var creds []*repos.Credential
 	for rows.Next() {
-		cred, err := r.parseCredential(rows)
+		cred, err := r.parseCredential(ci, rows)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -205,7 +205,7 @@ func (r *DbRepo) QueryCredentials(ctx context.Context, filter repos.QueryCredent
 	return creds, nil
 }
 
-func (r *DbRepo) parseCredential(row *sql.Rows) (*repos.Credential, error) {
+func (r *DbRepo) parseCredential(ci ciphers.Cipher, row *sql.Rows) (*repos.Credential, error) {
 	var (
 		cred             repos.Credential
 		tagsJSON         string
@@ -255,12 +255,12 @@ func (r *DbRepo) parseCredential(row *sql.Rows) (*repos.Credential, error) {
 		cred.AccessedAt = &accessedAt.Time
 	}
 
-	cred.Password, err = r.cipher.Decrypt(encryptedPwd)
+	cred.Password, err = ci.Decrypt(encryptedPwd)
 	if err != nil {
 		return nil, err
 	}
 
-	detailsJSON, err := r.cipher.Decrypt(encryptedDetails)
+	detailsJSON, err := ci.Decrypt(encryptedDetails)
 	if err != nil {
 		return nil, err
 	}
@@ -275,7 +275,7 @@ func (r *DbRepo) parseCredential(row *sql.Rows) (*repos.Credential, error) {
 
 /******************************************************************************/
 
-func (r *DbRepo) InsertCredential(ctx context.Context, cryptID string, cred *repos.Credential) (*repos.Credential, error) {
+func (r *DbRepo) InsertCredential(ctx context.Context, ci ciphers.Cipher, cryptID string, cred *repos.Credential) (*repos.Credential, error) {
 	if cred.ID == "" {
 		return nil, errors.New("credential id is required")
 	}
@@ -321,7 +321,7 @@ func (r *DbRepo) InsertCredential(ctx context.Context, cryptID string, cred *rep
 		return nil, err
 	}
 
-	encryptedPwd, err := r.cipher.Encrypt(cred.Password)
+	encryptedPwd, err := ci.Encrypt(cred.Password)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
@@ -332,7 +332,7 @@ func (r *DbRepo) InsertCredential(ctx context.Context, cryptID string, cred *rep
 		tx.Rollback()
 		return nil, err
 	}
-	encryptedDetails, err := r.cipher.Encrypt(detailsJSON)
+	encryptedDetails, err := ci.Encrypt(detailsJSON)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
@@ -385,7 +385,7 @@ func (r *DbRepo) InsertCredential(ctx context.Context, cryptID string, cred *rep
 		return nil, err
 	}
 
-	creds, err := r.QueryCredentials(ctx, repos.QueryCredentialsFilter{ID: cred.ID})
+	creds, err := r.QueryCredentials(ctx, ci, repos.QueryCredentialsFilter{ID: cred.ID})
 	if err != nil {
 		return nil, err
 	}
@@ -414,7 +414,7 @@ func (r *DbRepo) getLatestCredentialVersion(ctx context.Context, id string) (int
 	return latestVersion, nil
 }
 
-func (r *DbRepo) UpdateCredential(ctx context.Context, cryptID string, cred *repos.Credential) (*repos.Credential, error) {
+func (r *DbRepo) UpdateCredential(ctx context.Context, ci ciphers.Cipher, cryptID string, cred *repos.Credential) (*repos.Credential, error) {
 	if cred.ID == "" {
 		return nil, errors.New("credential id is required")
 	}
@@ -453,7 +453,7 @@ func (r *DbRepo) UpdateCredential(ctx context.Context, cryptID string, cred *rep
 		return nil, err
 	}
 
-	encryptedPwd, err := r.cipher.Encrypt(cred.Password)
+	encryptedPwd, err := ci.Encrypt(cred.Password)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
@@ -464,7 +464,7 @@ func (r *DbRepo) UpdateCredential(ctx context.Context, cryptID string, cred *rep
 		tx.Rollback()
 		return nil, err
 	}
-	encryptedDetails, err := r.cipher.Encrypt(detailsJSON)
+	encryptedDetails, err := ci.Encrypt(detailsJSON)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
@@ -516,7 +516,7 @@ func (r *DbRepo) UpdateCredential(ctx context.Context, cryptID string, cred *rep
 		return nil, err
 	}
 
-	creds, err := r.QueryCredentials(ctx, repos.QueryCredentialsFilter{ID: cred.ID})
+	creds, err := r.QueryCredentials(ctx, ci, repos.QueryCredentialsFilter{ID: cred.ID})
 	if err != nil {
 		return nil, err
 	}
@@ -529,8 +529,8 @@ func (r *DbRepo) UpdateCredential(ctx context.Context, cryptID string, cred *rep
 
 /******************************************************************************/
 
-func (r *DbRepo) AccessCredential(ctx context.Context, cryptID, credID string) (*repos.Credential, error) {
-	creds, err := r.QueryCredentials(ctx, repos.QueryCredentialsFilter{ID: credID, IncrementAccessCount: true})
+func (r *DbRepo) AccessCredential(ctx context.Context, ci ciphers.Cipher, cryptID, credID string) (*repos.Credential, error) {
+	creds, err := r.QueryCredentials(ctx, ci, repos.QueryCredentialsFilter{ID: credID, CryptID: cryptID, IncrementAccessCount: true})
 	if err != nil {
 		return nil, err
 	}

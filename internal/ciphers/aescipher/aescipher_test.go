@@ -1,12 +1,18 @@
 package aescipher
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+	"github.com/tagus/crypt/internal/ciphers"
 )
 
 func TestAESCipher_Encrypt(t *testing.T) {
-	ci, err := New("secret100")
+	signature := []byte("signature")
+	hashedPwd, err := ciphers.ComputeHashPwd("secret100")
+	require.NoError(t, err)
+
+	ci, err := New("secret100", hashedPwd, signature)
 	require.NoError(t, err)
 
 	buf, err := ci.Encrypt("hello world")
@@ -15,7 +21,11 @@ func TestAESCipher_Encrypt(t *testing.T) {
 }
 
 func TestAESCipher_Decrypt(t *testing.T) {
-	ci, err := New("secret100")
+	signature := []byte("signature")
+	hashedPwd, err := ciphers.ComputeHashPwd("secret100")
+	require.NoError(t, err)
+
+	ci, err := New("secret100", hashedPwd, signature)
 	require.NoError(t, err)
 
 	buf, err := ci.Encrypt("hello world")
@@ -28,15 +38,35 @@ func TestAESCipher_Decrypt(t *testing.T) {
 }
 
 func TestAESCipher_DecryptWithInvalidPassword(t *testing.T) {
-	ci, err := New("secret100")
+	signature := []byte("signature")
+	hashedPwd, err := ciphers.ComputeHashPwd("secret100")
+	require.NoError(t, err)
+
+	ci, err := New("secret100", hashedPwd, signature)
 	require.NoError(t, err)
 
 	buf, err := ci.Encrypt("hello world")
 	require.NoError(t, err)
 	require.NotEmpty(t, buf)
 
-	ciIncorrect, err := New("secret200")
+	_, err = New("secret200", hashedPwd, signature)
+	require.ErrorIs(t, err, ErrInvalidPassword)
+}
+
+func TestAESCipher_DecryptWithInvalidSignature(t *testing.T) {
+	signature := []byte("signature")
+	hashedPwd, err := ciphers.ComputeHashPwd("secret100")
 	require.NoError(t, err)
-	_, err = ciIncorrect.Decrypt(buf)
-	require.Error(t, err)
+
+	ci, err := New("secret100", hashedPwd, signature)
+	require.NoError(t, err)
+
+	buf, err := ci.Encrypt("hello world")
+	require.NoError(t, err)
+	require.NotEmpty(t, buf)
+
+	ci, err = New("secret100", hashedPwd, []byte("invalid-signature"))
+	require.NoError(t, err)
+	_, err = ci.Decrypt(buf)
+	require.ErrorIs(t, err, ciphers.ErrInvalidSignature)
 }

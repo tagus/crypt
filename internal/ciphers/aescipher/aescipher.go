@@ -5,18 +5,30 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"errors"
+
 	"github.com/tagus/crypt/internal/ciphers"
+	"golang.org/x/crypto/bcrypt"
+)
+
+var (
+	ErrInvalidPassword = errors.New("invalid password")
 )
 
 // AESCipher uses the AES encryption algorithm to encrypt and decrypt the provided data
 // while ensuring that the data is signed with a hash of the provided password in order
 // to ensure data integrity and provide password validation
 type AESCipher struct {
-	key   [32]byte
-	block cipher.Block
+	key       [32]byte
+	block     cipher.Block
+	signature []byte
 }
 
-func New(pwd string) (*AESCipher, error) {
+func New(pwd string, hashedPwd, signature []byte) (*AESCipher, error) {
+	err := bcrypt.CompareHashAndPassword(hashedPwd, []byte(pwd))
+	if err != nil {
+		return nil, ErrInvalidPassword
+	}
+
 	key := ciphers.ComputeHash(pwd)
 	var keyBits [32]byte
 	copy(keyBits[:], key)
@@ -26,11 +38,15 @@ func New(pwd string) (*AESCipher, error) {
 		return nil, err
 	}
 
-	return &AESCipher{key: keyBits, block: block}, nil
+	return &AESCipher{
+		key:       keyBits,
+		block:     block,
+		signature: signature,
+	}, nil
 }
 
 func (c *AESCipher) Encrypt(payload string) ([]byte, error) {
-	data, err := ciphers.SignMessage(payload, c.key[:])
+	data, err := ciphers.SignMessage(payload, c.signature)
 	if err != nil {
 		return nil, err
 	}
@@ -59,5 +75,5 @@ func (c *AESCipher) Decrypt(buf []byte) (string, error) {
 	stream := cipher.NewCFBDecrypter(c.block, iv)
 	stream.XORKeyStream(dec, dec)
 
-	return ciphers.DecodeMessage(dec, c.key[:])
+	return ciphers.DecodeMessage(dec, c.signature)
 }

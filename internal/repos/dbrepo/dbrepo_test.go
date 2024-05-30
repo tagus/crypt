@@ -6,8 +6,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/tagus/crypt/internal/ciphers/passthroughcipher"
+
+	"github.com/stretchr/testify/require"
 	"github.com/tagus/crypt/internal/repos"
 	"github.com/tagus/mango"
 
@@ -25,7 +26,7 @@ func TestMain(m *testing.M) {
 	mango.FatalIf(err)
 
 	ctx := context.TODO()
-	repo, err = initialize(ctx, passthroughcipher.New(), db)
+	repo, err = initialize(ctx, db)
 	mango.FatalIf(err)
 
 	resetDB()
@@ -48,14 +49,18 @@ func TestDbRepo_QueryCrypts(t *testing.T) {
 
 	ctx := context.TODO()
 	_, err := repo.InsertCrypt(ctx, &repos.Crypt{
-		ID:   "test-crypt-1",
-		Name: "default_crypt",
+		ID:             "test-crypt-1",
+		Name:           "default_crypt",
+		HashedPassword: []byte("hashed_password"),
+		Signature:      []byte("signature"),
 	})
 	require.NoError(t, err)
 
 	_, err = repo.InsertCrypt(ctx, &repos.Crypt{
-		ID:   "test-crypt-2",
-		Name: "alt_crypt",
+		ID:             "test-crypt-2",
+		Name:           "alt_crypt",
+		HashedPassword: []byte("hashed_password"),
+		Signature:      []byte("signature"),
 	})
 	require.NoError(t, err)
 
@@ -68,6 +73,10 @@ func TestDbRepo_QueryCrypts(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.Len(t, crypts, 1)
+	require.Equal(t, "test-crypt-1", crypts[0].ID)
+	require.Equal(t, "default_crypt", crypts[0].Name)
+	require.Equal(t, []byte("hashed_password"), crypts[0].HashedPassword)
+	require.Equal(t, []byte("signature"), crypts[0].Signature)
 
 	crypts, err = repo.QueryCrypts(ctx, repos.QueryCryptsFilter{
 		Name: "alt_crypt",
@@ -87,8 +96,10 @@ func TestDbRepo_CreateCrypt(t *testing.T) {
 
 	ctx := context.TODO()
 	crypt, err := repo.InsertCrypt(ctx, &repos.Crypt{
-		ID:   "test-crypt-1",
-		Name: "default_crypt",
+		ID:             "test-crypt-1",
+		Name:           "default_crypt",
+		HashedPassword: []byte("hashed_password"),
+		Signature:      []byte("signature"),
 	})
 	require.NoError(t, err)
 
@@ -103,12 +114,15 @@ func TestDbRepo_InsertCredential(t *testing.T) {
 
 	ctx := context.TODO()
 	crypt, err := repo.InsertCrypt(ctx, &repos.Crypt{
-		ID:   "test-crypt-1",
-		Name: "default_crypt",
+		ID:             "test-crypt-1",
+		Name:           "default_crypt",
+		HashedPassword: []byte("hashed_password"),
+		Signature:      []byte("signature"),
 	})
 	require.NoError(t, err)
 
-	cred, err := repo.InsertCredential(ctx, crypt.ID, &repos.Credential{
+	ci := passthroughcipher.New()
+	cred, err := repo.InsertCredential(ctx, ci, crypt.ID, &repos.Credential{
 		ID:          "credential-1",
 		Service:     "test-service",
 		Domains:     []string{"domain-1", "domain-2"},
@@ -147,12 +161,15 @@ func TestDbRepo_InsertCredentialWithoutID(t *testing.T) {
 
 	ctx := context.TODO()
 	crypt, err := repo.InsertCrypt(ctx, &repos.Crypt{
-		ID:   "test-crypt-1",
-		Name: "default_crypt",
+		ID:             "test-crypt-1",
+		Name:           "default_crypt",
+		HashedPassword: []byte("hashed_password"),
+		Signature:      []byte("signature"),
 	})
 	require.NoError(t, err)
 
-	_, err = repo.InsertCredential(ctx, crypt.ID, &repos.Credential{
+	ci := passthroughcipher.New()
+	_, err = repo.InsertCredential(ctx, ci, crypt.ID, &repos.Credential{
 		Service:     "test-service",
 		Domains:     nil,
 		Email:       "test@test.com",
@@ -170,12 +187,15 @@ func TestDbRepo_InsertCredentialWithNullValues(t *testing.T) {
 
 	ctx := context.TODO()
 	crypt, err := repo.InsertCrypt(ctx, &repos.Crypt{
-		ID:   "test-crypt-1",
-		Name: "default_crypt",
+		ID:             "test-crypt-1",
+		Name:           "default_crypt",
+		HashedPassword: []byte("hashed_password"),
+		Signature:      []byte("signature"),
 	})
 	require.NoError(t, err)
 
-	cred, err := repo.InsertCredential(ctx, crypt.ID, &repos.Credential{
+	ci := passthroughcipher.New()
+	cred, err := repo.InsertCredential(ctx, ci, crypt.ID, &repos.Credential{
 		ID:          "credential-1",
 		Service:     "test-service",
 		Domains:     nil,
@@ -199,12 +219,15 @@ func TestDbRepo_UpdateCredential(t *testing.T) {
 
 	ctx := context.TODO()
 	crypt, err := repo.InsertCrypt(ctx, &repos.Crypt{
-		ID:   "test-crypt-1",
-		Name: "default_crypt",
+		ID:             "test-crypt-1",
+		Name:           "default_crypt",
+		HashedPassword: []byte("hashed_password"),
+		Signature:      []byte("signature"),
 	})
 	require.NoError(t, err)
 
-	cred, err := repo.InsertCredential(ctx, crypt.ID, &repos.Credential{
+	ci := passthroughcipher.New()
+	cred, err := repo.InsertCredential(ctx, ci, crypt.ID, &repos.Credential{
 		ID:          "credential-1",
 		Service:     "test-service",
 		Domains:     []string{"domain-1", "domain-2"},
@@ -229,7 +252,7 @@ func TestDbRepo_UpdateCredential(t *testing.T) {
 	require.Equal(t, 1, cred.Version)
 
 	cred.Password = "new-password"
-	cred, err = repo.UpdateCredential(ctx, crypt.ID, cred)
+	cred, err = repo.UpdateCredential(ctx, ci, crypt.ID, cred)
 	require.NoError(t, err)
 	require.Equal(t, "new-password", cred.Password)
 	require.Equal(t, 2, cred.Version)
@@ -240,12 +263,15 @@ func TestDbRepo_QueryCredentialsWithIncrementAccessCountFlag(t *testing.T) {
 
 	ctx := context.TODO()
 	crypt, err := repo.InsertCrypt(ctx, &repos.Crypt{
-		ID:   "test-crypt-1",
-		Name: "default_crypt",
+		ID:             "test-crypt-1",
+		Name:           "default_crypt",
+		HashedPassword: []byte("hashed_password"),
+		Signature:      []byte("signature"),
 	})
 	require.NoError(t, err)
 
-	cred, err := repo.InsertCredential(ctx, crypt.ID, &repos.Credential{
+	ci := passthroughcipher.New()
+	cred, err := repo.InsertCredential(ctx, ci, crypt.ID, &repos.Credential{
 		ID:          "credential-1",
 		Service:     "test-service",
 		Domains:     []string{"domain-1", "domain-2"},
@@ -266,13 +292,17 @@ func TestDbRepo_QueryCredentialsWithIncrementAccessCountFlag(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, 0, cred.AccessedCount)
 
-	creds, err := repo.QueryCredentials(ctx, repos.QueryCredentialsFilter{ID: cred.ID, IncrementAccessCount: true})
+	creds, err := repo.QueryCredentials(
+		ctx,
+		ci,
+		repos.QueryCredentialsFilter{ID: cred.ID, IncrementAccessCount: true},
+	)
 	require.NoError(t, err)
 	require.Len(t, creds, 1)
 	require.Equal(t, 1, creds[0].AccessedCount)
 	require.NotNil(t, creds[0].AccessedAt)
 
-	newCreds, err := repo.QueryCredentials(ctx, repos.QueryCredentialsFilter{ID: cred.ID})
+	newCreds, err := repo.QueryCredentials(ctx, ci, repos.QueryCredentialsFilter{ID: cred.ID})
 	require.NoError(t, err)
 	require.Len(t, newCreds, 1)
 	require.Equal(t, creds[0].AccessedCount, newCreds[0].AccessedCount)

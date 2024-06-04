@@ -39,5 +39,6 @@ CREATE TABLE IF NOT EXISTS credential_versions (
     s_password BLOB NOT NULL,
     description TEXT NOT NULL,
     s_details BLOB NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (credential_id, version)
 );

@@ -49,6 +49,7 @@ func initEnv(ctx context.Context, opts InitStoreOpts) (*Environment, error) {
 		return nil, err
 	}
 	mango.Debug("using crypt at: ", color.YellowString(path))
+	mango.Debug("using crypt:", color.YellowString(opts.CryptName))
 
 	repo, err := dbrepo.Initialize(ctx, path)
 	if err != nil {

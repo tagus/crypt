@@ -10,7 +10,7 @@ import (
 	"github.com/tagus/crypt/internal/asker"
 	"github.com/tagus/crypt/internal/ciphers"
 	"github.com/tagus/crypt/internal/ciphers/aescipher"
-	"github.com/tagus/crypt/internal/crypt"
+	"github.com/tagus/crypt/internal/legacycrypt"
 	"github.com/tagus/crypt/internal/repos"
 	"github.com/tagus/crypt/internal/repos/dbrepo"
 	"github.com/tagus/mango"
@@ -92,12 +92,12 @@ func main() {
 	mango.Debug("import complete for crypt:", newCrypt.ID)
 }
 
-func parseCryptFile(path string) (*crypt.Crypt, error) {
+func parseCryptFile(path string) (*legacycrypt.Crypt, error) {
 	buf, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	cr, err := crypt.FromJSON(buf)
+	cr, err := legacycrypt.FromJSON(buf)
 	if err != nil {
 		return nil, err
 	}

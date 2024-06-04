@@ -1,4 +1,4 @@
-package crypt
+package legacycrypt
 
 import (
 	"encoding/json"

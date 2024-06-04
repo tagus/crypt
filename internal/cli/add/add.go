@@ -10,6 +10,10 @@ import (
 	"github.com/tagus/mango"
 )
 
+var (
+	useUI bool
+)
+
 var Command = &cobra.Command{
 	Use:     "add [service]",
 	Short:   "add a service to crypt",
@@ -17,6 +21,10 @@ var Command = &cobra.Command{
 	Args:    cutils.ServiceMaybeNew,
 	Example: "add Amazon Web Services",
 	RunE:    add,
+}
+
+func init() {
+	Command.Flags().BoolVar(&useUI, "ui", false, "whether to use the ui form view instead")
 }
 
 func add(cmd *cobra.Command, args []string) error {
@@ -32,24 +40,47 @@ func add(cmd *cobra.Command, args []string) error {
 	}
 
 	var cred *repos.Credential
-	for {
-		cred, err = buildCredential(svc)
+	if useUI {
+		form := &Form{cr: env.Repo()}
+		cred, err = form.Show(cmd.Context(), svc)
 		if err != nil {
 			return err
+		}
+	} else {
+		cred, err = getCredentialDetails(svc)
+		if err != nil {
+			return err
+		}
+		repo := env.Repo()
+		cred, err = repo.InsertCredential(cmd.Context(), cred)
+		if err != nil {
+			return err
+		}
+	}
+
+	if cred == nil {
+		mango.Warning("no credential was added")
+		return nil
+	}
+	mango.Debug(cred)
+	mango.Debug("added credential for", cred.Service)
+	return nil
+}
+
+/******************************************************************************/
+
+func getCredentialDetails(service string) (*repos.Credential, error) {
+	var cred *repos.Credential
+	for {
+		cred, err := buildCredential(service)
+		if err != nil {
+			return nil, err
 		}
 		if cred != nil {
 			break
 		}
 	}
-
-	repo := env.Repo()
-	cred, err = repo.InsertCredential(cmd.Context(), cred)
-	if err != nil {
-		return err
-	}
-	mango.Info(cred)
-	mango.Info("added credential for", cred.Service)
-	return nil
+	return cred, nil
 }
 
 func buildCredential(service string) (*repos.Credential, error) {

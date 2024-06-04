@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/tagus/crypt/internal/ciphers/passthroughcipher"
 
@@ -150,6 +151,8 @@ func TestDbRepo_InsertCredential(t *testing.T) {
 	require.Equal(t, "description", cred.Description)
 	require.Equal(t, []string{"tag-1", "tag-2"}, cred.Tags)
 	require.Equal(t, 1, cred.Version)
+	require.Equal(t, 0, cred.AccessedCount)
+	require.Nil(t, cred.AccessedAt)
 
 	require.Len(t, cred.Details.SecurityQuestions, 1)
 	require.Equal(t, cred.Details.SecurityQuestions[0].Question, "question")
@@ -180,6 +183,39 @@ func TestDbRepo_InsertCredentialWithoutID(t *testing.T) {
 		Tags:        nil,
 	})
 	require.Error(t, err)
+}
+
+func TestDbRepo_InsertCredentialWithAccessDetails(t *testing.T) {
+	defer resetDB()
+
+	ctx := context.TODO()
+	crypt, err := repo.InsertCrypt(ctx, &repos.Crypt{
+		ID:             "test-crypt-1",
+		Name:           "default_crypt",
+		HashedPassword: []byte("hashed_password"),
+		Signature:      []byte("signature"),
+	})
+	require.NoError(t, err)
+
+	ts := time.Now()
+
+	ci := passthroughcipher.New()
+	cr, err := repo.InsertCredential(ctx, ci, crypt.ID, &repos.Credential{
+		ID:            "credential-1",
+		Service:       "test-service",
+		Domains:       nil,
+		Email:         "test@test.com",
+		Username:      "username",
+		Password:      "password",
+		Description:   "description",
+		AccessedAt:    &ts,
+		AccessedCount: 1,
+		Details:       nil,
+		Tags:          nil,
+	})
+	require.NoError(t, err)
+	require.Equal(t, 1, cr.AccessedCount)
+	require.Equal(t, ts.Unix(), cr.AccessedAt.Unix())
 }
 
 func TestDbRepo_InsertCredentialWithNullValues(t *testing.T) {

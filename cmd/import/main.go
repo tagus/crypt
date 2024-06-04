@@ -35,18 +35,13 @@ func main() {
 	}
 	mango.Debug("sqlite db file path: ", *db)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	repo, err := dbrepo.Initialize(ctx, *db)
-	mango.FatalIf(err)
-
 	/******************************************************************************/
 
 	// asking user for master password that will be used to decrypt the secure values
 	ak := asker.DefaultAsker()
 	pwd, err := ak.AskSecret(color.YellowString("pwd"), true)
 	mango.FatalIf(err)
+	mango.Debug("collected password")
 
 	signature := []byte(ciphers.ComputeHash(mango.ShortID()))
 	hashedPwd, err := ciphers.ComputeHashPwd(pwd)
@@ -57,13 +52,26 @@ func main() {
 
 	/******************************************************************************/
 
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	repo, err := dbrepo.Initialize(ctx, *db)
+	mango.FatalIf(err)
+
 	cr, err := parseCryptFile(*cp)
 	mango.FatalIf(err)
 
 	mango.Debug("importing crypt:", cr.Id)
 	newCrypt, err := repo.InsertCrypt(
 		ctx,
-		&repos.Crypt{ID: cr.Id, Name: *name, HashedPassword: hashedPwd, Signature: signature},
+		&repos.Crypt{
+			ID:             cr.Id,
+			Name:           *name,
+			HashedPassword: hashedPwd,
+			Signature:      signature,
+			CreatedAt:      cr.GetCreatedAt(),
+			UpdatedAt:      cr.GetUpdatedAt(),
+		},
 	)
 	mango.FatalIf(err)
 
@@ -71,20 +79,22 @@ func main() {
 
 	for _, cred := range cr.Credentials {
 		newCred, err := repo.InsertCredential(ctx, ci, newCrypt.ID, &repos.Credential{
-			ID:          cred.Id,
-			Service:     cred.Service,
-			Email:       cred.Email,
-			Username:    cred.Username,
-			Password:    cred.Password,
-			Description: cred.Description,
-			Details:     &repos.Details{},
-			Tags:        cred.Tags,
-			Domains:     []string{},
-			CreatedAt:   cred.GetCreatedAt(),
-			UpdatedAt:   cred.GetUpdatedAt(),
+			ID:            cred.Id,
+			Service:       cred.Service,
+			Email:         cred.Email,
+			Username:      cred.Username,
+			Password:      cred.Password,
+			Description:   cred.Description,
+			Details:       &repos.Details{},
+			Tags:          cred.Tags,
+			Domains:       []string{},
+			CreatedAt:     cred.GetCreatedAt(),
+			UpdatedAt:     cred.GetUpdatedAt(),
+			AccessedAt:    cred.GetAccessedAt(),
+			AccessedCount: cred.AccessedCount,
 		})
 		mango.FatalIf(err)
-		mango.Debug("imported service:", newCred.Service)
+		mango.Debug("imported service:", newCred.Service, cred.AccessedCount)
 	}
 
 	/******************************************************************************/

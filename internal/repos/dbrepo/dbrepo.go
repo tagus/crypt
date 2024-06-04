@@ -304,6 +304,7 @@ func (r *DbRepo) InsertCredential(ctx context.Context, ci ciphers.Cipher, cryptI
 			"latest_version",
 			"tags",
 			"accessed_count",
+			"accessed_at",
 			"crypt_id",
 		).
 		Values(
@@ -311,7 +312,8 @@ func (r *DbRepo) InsertCredential(ctx context.Context, ci ciphers.Cipher, cryptI
 			1,
 			1,
 			tagsJSON,
-			0,
+			cred.AccessedCount,
+			cred.AccessedAt,
 			cryptID,
 		).
 		RunWith(tx).

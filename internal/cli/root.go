@@ -2,6 +2,7 @@ package cli
 
 import (
 	"errors"
+	"github.com/tagus/crypt/internal/cli/edit"
 	"os"
 
 	"github.com/tagus/crypt/internal/cli/list"
@@ -59,6 +60,7 @@ func Execute() {
 	rootCmd.AddCommand(show.Command)
 	rootCmd.AddCommand(archive.Command)
 	rootCmd.AddCommand(list.Command)
+	rootCmd.AddCommand(edit.Command)
 
 	if err := rootCmd.Execute(); err != nil {
 		if errors.Is(err, asker.ErrInterrupt) {

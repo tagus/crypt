@@ -34,11 +34,10 @@ func SignMessage(msg string, key []byte) ([]byte, error) {
 	}
 	mac := hmac.New(sha256.New, key)
 	mac.Write([]byte(msg))
-	token := mac.Sum(nil)
+	signature := mac.Sum(nil)
 
 	buf := []byte(msg)
-	buf = append(buf, '&')
-	buf = append(buf, token...)
+	buf = append(buf, signature...)
 	return buf, nil
 }
 
@@ -50,17 +49,13 @@ func DecodeMessage(buf []byte, key []byte) (string, error) {
 		return "", fmt.Errorf("%w: message is too short", ErrInvalidSignature)
 	}
 
-	split := len(buf) - sha256.Size
-	if buf[split-1] != '&' {
-		return "", fmt.Errorf("%w: no delimiter found", ErrInvalidSignature)
-	}
-	msg, signature := buf[:split-1], buf[split:]
+	msg, signature := buf[:len(buf)-sha256.Size], buf[len(buf)-sha256.Size:]
 
 	mac := hmac.New(sha256.New, key)
 	mac.Write(msg)
-	token := mac.Sum(nil)
+	expectedSignature := mac.Sum(nil)
 
-	if hmac.Equal(token, signature) {
+	if hmac.Equal(expectedSignature, signature) {
 		return string(msg), nil
 	}
 	return "", fmt.Errorf("%w: token mismatch", ErrInvalidSignature)

@@ -549,7 +549,7 @@ func (r *DbRepo) AccessCredential(ctx context.Context, ci ciphers.Cipher, cryptI
 
 /******************************************************************************/
 
-func (r *DbRepo) ArchiveCredential(ctx context.Context, credID string) error {
+func (r *DbRepo) ArchiveCredential(ctx context.Context, cryptID, credID string) error {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -568,8 +568,9 @@ func (r *DbRepo) ArchiveCredential(ctx context.Context, credID string) error {
 
 	_, err = sq.Update("crypts").
 		Set("updated_at", time.Now()).
+		Set("total_active_credentials", sq.Expr("total_active_credentials - 1")).
 		RunWith(tx).
-		Where(sq.Eq{"id": credID}).
+		Where(sq.Eq{"id": cryptID}).
 		ExecContext(ctx)
 
 	if err != nil {

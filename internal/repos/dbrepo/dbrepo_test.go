@@ -418,10 +418,15 @@ func TestDbRepo_ArchiveCredential(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, 0, cred.AccessedCount)
 
-	err = repo.ArchiveCredential(ctx, cred.ID)
+	err = repo.ArchiveCredential(ctx, crypt.ID, cred.ID)
 	require.NoError(t, err)
 
 	creds, err := repo.QueryCredentials(ctx, ci, repos.QueryCredentialsFilter{ID: cred.ID})
 	require.NoError(t, err)
 	require.Len(t, creds, 0)
+
+	crypts, err := repo.QueryCrypts(ctx, repos.QueryCryptsFilter{ID: crypt.ID})
+	require.NoError(t, err)
+	require.Len(t, crypts, 1)
+	require.Equal(t, 0, crypts[0].TotalActiveCredentials)
 }

@@ -57,5 +57,5 @@ func (c *CryptRepo) ArchiveCredential(
 	ctx context.Context,
 	credID string,
 ) error {
-	return c.repo.ArchiveCredential(ctx, credID)
+	return c.repo.ArchiveCredential(ctx, c.cryptID, credID)
 }

@@ -12,3 +12,4 @@ crypt
 crypt.linux
 !crypt/
 out.json
+bin

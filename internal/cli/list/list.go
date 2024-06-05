@@ -2,6 +2,7 @@ package list
 
 import (
 	"fmt"
+	"github.com/tagus/mango"
 
 	"github.com/tagus/crypt/internal/repos"
 
@@ -54,7 +55,7 @@ func list(cmd *cobra.Command, args []string) error {
 		data[counter] = []string{
 			cred.ID,
 			cred.Service,
-			utils.FormatTimeSince(cred.AccessedAt),
+			mango.FormatTimeSince(cred.AccessedAt),
 		}
 		counter++
 	}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/tagus/crypt/internal/repos"
+	"github.com/tagus/mango"
 	"os"
 	"regexp"
 	"strconv"
@@ -51,9 +52,9 @@ func PrintCredential(cred *repos.Credential) {
 		{"service", getFallbackString(cred.Service)},
 		{"email", getFallbackString(cred.Email)},
 		{"username", getFallbackString(cred.Username)},
-		{"created_at", FormatDate(&cred.CreatedAt)},
-		{"updated_at", FormatDate(&cred.UpdatedAt)},
-		{"accessed_at", FormatDate(cred.AccessedAt)},
+		{"created_at", mango.FormatSimpleDate(&cred.CreatedAt)},
+		{"updated_at", mango.FormatSimpleDate(&cred.UpdatedAt)},
+		{"accessed_at", mango.FormatSimpleDate(cred.AccessedAt)},
 		{"accessed_count", strconv.Itoa(cred.AccessedCount)},
 		{"tags", fmt.Sprintf("%v", cred.Tags)},
 	}

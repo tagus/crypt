@@ -50,7 +50,7 @@ func TestAESCipher_DecryptWithInvalidPassword(t *testing.T) {
 	require.NotEmpty(t, buf)
 
 	_, err = New("secret200", hashedPwd, signature)
-	require.ErrorIs(t, err, ErrInvalidPassword)
+	require.ErrorIs(t, err, ciphers.ErrInvalidPassword)
 }
 
 func TestAESCipher_DecryptWithInvalidSignature(t *testing.T) {

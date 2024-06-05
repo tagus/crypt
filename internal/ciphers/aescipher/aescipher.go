@@ -10,10 +10,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var (
-	ErrInvalidPassword = errors.New("invalid password")
-)
-
 // AESCipher uses the AES encryption algorithm to encrypt and decrypt the provided data
 // while ensuring that the data is signed with a hash of the provided password in order
 // to ensure data integrity and provide password validation
@@ -26,7 +22,7 @@ type AESCipher struct {
 func New(pwd string, hashedPwd, signature []byte) (*AESCipher, error) {
 	err := bcrypt.CompareHashAndPassword(hashedPwd, []byte(pwd))
 	if err != nil {
-		return nil, ErrInvalidPassword
+		return nil, ciphers.ErrInvalidPassword
 	}
 
 	key := ciphers.ComputeHash(pwd)

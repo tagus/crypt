@@ -2,6 +2,8 @@ package cli
 
 import (
 	"errors"
+	"github.com/fatih/color"
+	"github.com/tagus/crypt/internal/ciphers"
 	"github.com/tagus/crypt/internal/cli/edit"
 	"os"
 
@@ -37,8 +39,9 @@ The db file can be specified using the following methods listed here in decreasi
 	2. CRYPT_DB env variable
 	3. ./.crypt.db
 	4. ~/.crypt.db`,
-	SilenceUsage: true,
-	Version:      Version,
+	SilenceUsage:  true,
+	SilenceErrors: true,
+	Version:       Version,
 }
 
 func Execute() {
@@ -63,7 +66,9 @@ func Execute() {
 	rootCmd.AddCommand(edit.Command)
 
 	if err := rootCmd.Execute(); err != nil {
-		if errors.Is(err, asker.ErrInterrupt) {
+		if errors.Is(err, ciphers.ErrInvalidPassword) {
+			mango.Info(color.YellowString("invalid password"))
+		} else if errors.Is(err, asker.ErrInterrupt) {
 			os.Exit(0)
 		} else {
 			mango.Fatal(err)

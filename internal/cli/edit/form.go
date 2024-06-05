@@ -40,14 +40,18 @@ func (f *Form) Show(ctx context.Context, cred *repos.Credential) (*repos.Credent
 				cred.Description != updated.Description {
 				wasModified = true
 			}
-			if wasModified {
+
+			if cred.Password != updated.Password {
+				mango.Debug("password was modified")
 				if updated.Password != confirmPassword {
 					app.SetRoot(f.buildModal("passwords do not match", func() {
 						app.SetRoot(form, true)
 					}), true)
 					return
 				}
+			}
 
+			if wasModified {
 				updated, err = f.cr.UpdateCredential(ctx, updated)
 				app.Stop()
 			} else {

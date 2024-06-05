@@ -183,6 +183,9 @@ func TestDbRepo_InsertCredentialWithoutID(t *testing.T) {
 		Tags:        nil,
 	})
 	require.Error(t, err)
+
+	_, err = repo.InsertCredential(ctx, ci, crypt.ID, nil)
+	require.Error(t, err)
 }
 
 func TestDbRepo_InsertCredentialWithAccessDetails(t *testing.T) {

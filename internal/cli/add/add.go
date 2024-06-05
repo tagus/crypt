@@ -70,9 +70,12 @@ func add(cmd *cobra.Command, args []string) error {
 /******************************************************************************/
 
 func getCredentialDetails(service string) (*repos.Credential, error) {
-	var cred *repos.Credential
+	var (
+		cred *repos.Credential
+		err  error
+	)
 	for {
-		cred, err := buildCredential(service)
+		cred, err = buildCredential(service)
 		if err != nil {
 			return nil, err
 		}

@@ -283,6 +283,9 @@ func (r *DbRepo) parseCredential(ci ciphers.Cipher, row *sql.Rows) (*repos.Crede
 /******************************************************************************/
 
 func (r *DbRepo) InsertCredential(ctx context.Context, ci ciphers.Cipher, cryptID string, cred *repos.Credential) (*repos.Credential, error) {
+	if cred == nil {
+		return nil, errors.New("credential is required")
+	}
 	if cred.ID == "" {
 		return nil, errors.New("credential id is required")
 	}

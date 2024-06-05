@@ -6,6 +6,7 @@ import (
 	"github.com/tagus/crypt/internal/cli/environment"
 	"github.com/tagus/crypt/internal/repos"
 	"github.com/tagus/mango"
+	"strings"
 )
 
 type Form struct {
@@ -26,11 +27,13 @@ func (f *Form) Show(ctx context.Context, service string) (*repos.Credential, err
 		err             error
 	)
 	form = tview.NewForm().
-		AddInputField("service", service, 20, nil, onChange(&cred.Service)).
-		AddInputField("email", "", 20, nil, onChange(&cred.Email)).
-		AddPasswordField("password", "", 20, '*', onChange(&cred.Password)).
-		AddPasswordField("confirm password", "", 20, '*', onChange(&confirmPassword)).
+		AddInputField("service", service, 30, nil, onChange(&cred.Service)).
+		AddInputField("email", "", 30, nil, onChange(&cred.Email)).
+		AddInputField("username", "", 30, nil, onChange(&cred.Username)).
+		AddPasswordField("password", "", 30, '*', onChange(&cred.Password)).
+		AddPasswordField("confirm password", "", 30, '*', onChange(&confirmPassword)).
 		AddTextArea("description", "", 40, 0, 0, onChange(&cred.Description)).
+		AddInputField("tags", "", 40, nil, onTagsChange(&cred.Tags)).
 		AddButton("save", func() {
 			if cred.Password != confirmPassword {
 				modal := f.buildModal("passwords do not match", func() {
@@ -67,6 +70,14 @@ func (f *Form) Show(ctx context.Context, service string) (*repos.Credential, err
 func onChange(val *string) func(text string) {
 	return func(text string) {
 		*val = text
+	}
+}
+
+func onTagsChange(val *[]string) func(text string) {
+	return func(text string) {
+		*val = mango.Map(strings.Split(text, ","), func(val string) string {
+			return strings.TrimSpace(val)
+		})
 	}
 }
 

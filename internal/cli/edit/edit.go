@@ -41,6 +41,10 @@ func edit(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	if cred == nil {
+		mango.Warning("no credential was updated")
+		return nil
+	}
 	mango.Debug("updated credential:", cred.Service)
 	utils.PrintCredential(cred)
 

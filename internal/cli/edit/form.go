@@ -6,6 +6,8 @@ import (
 	"github.com/rivo/tview"
 	"github.com/tagus/crypt/internal/cli/environment"
 	"github.com/tagus/crypt/internal/repos"
+	"github.com/tagus/mango"
+	"strings"
 )
 
 type Form struct {
@@ -26,9 +28,11 @@ func (f *Form) Show(ctx context.Context, cred *repos.Credential) (*repos.Credent
 	form = tview.NewForm().
 		AddInputField("service", cred.Service, 20, nil, onChange(&updated.Service)).
 		AddInputField("email", cred.Email, 20, nil, onChange(&updated.Email)).
+		AddInputField("username", "", 20, nil, onChange(&updated.Username)).
 		AddPasswordField("password", cred.Password, 20, '*', onChange(&updated.Password)).
 		AddPasswordField("confirm password", "", 20, '*', onChange(&confirmPassword)).
 		AddTextArea("description", cred.Description, 40, 0, 0, onChange(&updated.Description)).
+		AddInputField("tags", strings.Join(cred.Tags, ", "), 40, nil, onTagsChange(&cred.Tags)).
 		AddButton("save", func() {
 			if cred.Service != updated.Service ||
 				cred.Email != updated.Email ||
@@ -74,6 +78,14 @@ func (f *Form) Show(ctx context.Context, cred *repos.Credential) (*repos.Credent
 func onChange(val *string) func(text string) {
 	return func(text string) {
 		*val = text
+	}
+}
+
+func onTagsChange(val *[]string) func(text string) {
+	return func(text string) {
+		*val = mango.Map(strings.Split(text, ","), func(val string) string {
+			return strings.TrimSpace(val)
+		})
 	}
 }
 

@@ -20,7 +20,11 @@ import (
 	"github.com/tagus/mango"
 )
 
-const Version = "v2.0.0"
+const (
+	Version     = "v2.0.0"
+	VerboseFlag = "verbose"
+	LogPrefix   = "crypt"
+)
 
 var rootCmd = &cobra.Command{
 	Use:   "crypt",
@@ -39,13 +43,13 @@ The db file can be specified using the following methods listed here in decreasi
 	2. CRYPT_DB env variable
 	3. ./.crypt.db
 	4. ~/.crypt.db`,
-	SilenceUsage:  true,
-	SilenceErrors: true,
-	Version:       Version,
+	SilenceUsage:      true,
+	SilenceErrors:     true,
+	Version:           Version,
+	PersistentPreRunE: initialize,
 }
 
 func Execute() {
-	mango.Init(mango.LogLevelDebug, "crypt")
 
 	rootCmd.
 		PersistentFlags().
@@ -56,6 +60,9 @@ func Execute() {
 	rootCmd.
 		PersistentFlags().
 		StringP(environment.CryptNameFlag, "n", "main", "the crypt name")
+	rootCmd.
+		PersistentFlags().
+		BoolP(VerboseFlag, "v", false, "print out any debug logs")
 
 	// adding all subcommands
 	rootCmd.AddCommand(info.Command)
@@ -74,4 +81,21 @@ func Execute() {
 			mango.Fatal(err)
 		}
 	}
+}
+
+func initialize(cmd *cobra.Command, args []string) error {
+	// checking log level
+	isVerbose, err := cmd.Flags().GetBool(VerboseFlag)
+	if err != nil {
+		return err
+	}
+
+	if isVerbose {
+		mango.Init(mango.LogLevelDebug, LogPrefix)
+		mango.Debug("log level is set to verbose")
+	} else {
+		mango.Init(mango.LogLevelInfo, LogPrefix)
+	}
+
+	return nil
 }

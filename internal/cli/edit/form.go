@@ -32,12 +32,13 @@ func (f *Form) Show(ctx context.Context, cred *repos.Credential) (*repos.Credent
 		AddPasswordField("password", cred.Password, 20, '*', onChange(&updated.Password)).
 		AddPasswordField("confirm password", "", 20, '*', onChange(&confirmPassword)).
 		AddTextArea("description", cred.Description, 40, 0, 0, onChange(&updated.Description)).
-		AddInputField("tags", strings.Join(cred.Tags, ", "), 40, nil, onTagsChange(&cred.Tags)).
+		AddInputField("tags", strings.Join(cred.Tags, ", "), 40, nil, onTagsChange(&updated.Tags)).
 		AddButton("save", func() {
 			if cred.Service != updated.Service ||
 				cred.Email != updated.Email ||
 				cred.Password != updated.Password ||
-				cred.Description != updated.Description {
+				cred.Description != updated.Description ||
+				!mango.StringSliceEqual(cred.Tags, updated.Tags) {
 				wasModified = true
 			}
 

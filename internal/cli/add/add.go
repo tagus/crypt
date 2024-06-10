@@ -5,6 +5,7 @@ import (
 	"github.com/tagus/crypt/internal/asker"
 	"github.com/tagus/crypt/internal/cli/cutils"
 	"github.com/tagus/crypt/internal/cli/environment"
+	"github.com/tagus/crypt/internal/components"
 	"github.com/tagus/crypt/internal/repos"
 	"github.com/tagus/crypt/internal/utils"
 	"github.com/tagus/mango"
@@ -41,8 +42,13 @@ func add(cmd *cobra.Command, args []string) error {
 
 	var cred *repos.Credential
 	if useUI {
-		form := &Form{cr: env.Repo()}
-		cred, err = form.Show(cmd.Context(), svc)
+		form := components.NewForm(components.FormOpts{
+			Title: "add a new service credential",
+			OnSave: func(cr *repos.Credential, fn components.ShowModalFn) (*repos.Credential, error) {
+				return env.Repo().InsertCredential(cmd.Context(), cr)
+			},
+		})
+		cred, err = form.Show()
 		if err != nil {
 			return err
 		}

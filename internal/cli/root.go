@@ -2,14 +2,12 @@ package cli
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 	"os"
 
-	"github.com/fatih/color"
 	"github.com/tagus/crypt/internal/ciphers"
+	"github.com/tagus/crypt/internal/cli/cutils"
 	"github.com/tagus/crypt/internal/cli/edit"
-
 	"github.com/tagus/crypt/internal/cli/list"
 
 	"github.com/tagus/crypt/internal/cli/archive"
@@ -26,7 +24,6 @@ import (
 const (
 	Version     = "v2.1.2"
 	VerboseFlag = "verbose"
-	LogPrefix   = "crypt"
 )
 
 var rootCmd = &cobra.Command{
@@ -53,7 +50,6 @@ The db file can be specified using the following methods listed here in decreasi
 }
 
 func Execute() {
-
 	rootCmd.
 		PersistentFlags().
 		StringP(environment.CryptDBPathFlag, "c", "", "the crypt db location")
@@ -77,17 +73,23 @@ func Execute() {
 
 	if err := rootCmd.Execute(); err != nil {
 		if errors.Is(err, ciphers.ErrInvalidPassword) {
-			fmt.Println(color.YellowString("invalid password"))
+			slog.Warn("invalid password")
+		} else if errors.Is(err, cutils.ErrNoCredentialFound) {
+			slog.Warn("invalid service provided")
 		} else if errors.Is(err, asker.ErrInterrupt) {
 			os.Exit(0)
 		} else {
-			mango.Fatal(err)
+			isVerbose, _ := rootCmd.Flags().GetBool(VerboseFlag)
+			if isVerbose {
+				slog.Error(err.Error())
+			} else {
+				mango.Fatal(err)
+			}
 		}
 	}
 }
 
 func initialize(cmd *cobra.Command, args []string) error {
-	// checking log level
 	isVerbose, err := cmd.Flags().GetBool(VerboseFlag)
 	if err != nil {
 		return err

@@ -2,10 +2,13 @@ package cli
 
 import (
 	"errors"
+	"fmt"
+	"log/slog"
+	"os"
+
 	"github.com/fatih/color"
 	"github.com/tagus/crypt/internal/ciphers"
 	"github.com/tagus/crypt/internal/cli/edit"
-	"os"
 
 	"github.com/tagus/crypt/internal/cli/list"
 
@@ -21,7 +24,7 @@ import (
 )
 
 const (
-	Version     = "v2.0.0"
+	Version     = "v2.1.0"
 	VerboseFlag = "verbose"
 	LogPrefix   = "crypt"
 )
@@ -74,7 +77,7 @@ func Execute() {
 
 	if err := rootCmd.Execute(); err != nil {
 		if errors.Is(err, ciphers.ErrInvalidPassword) {
-			mango.Info(color.YellowString("invalid password"))
+			fmt.Println(color.YellowString("invalid password"))
 		} else if errors.Is(err, asker.ErrInterrupt) {
 			os.Exit(0)
 		} else {
@@ -91,10 +94,10 @@ func initialize(cmd *cobra.Command, args []string) error {
 	}
 
 	if isVerbose {
-		mango.Init(mango.LogLevelDebug, LogPrefix)
-		mango.Debug("log level is set to verbose")
+		mango.Init(slog.LevelDebug, "import")
+		slog.Debug("log level is set to verbose")
 	} else {
-		mango.Init(mango.LogLevelInfo, LogPrefix)
+		mango.Init(slog.LevelInfo, "import")
 	}
 
 	return nil

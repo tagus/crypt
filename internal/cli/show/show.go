@@ -2,13 +2,13 @@ package show
 
 import (
 	"errors"
+	"log/slog"
 
 	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/cli/cutils"
 	"github.com/tagus/crypt/internal/cli/environment"
 	"github.com/tagus/crypt/internal/utils"
-	"github.com/tagus/mango"
 )
 
 var Command = &cobra.Command{
@@ -29,7 +29,7 @@ func show(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	mango.Debug("selected credential id:", credID)
+	slog.Debug("selected credential id", "cred_id", credID)
 
 	repo := env.Repo()
 	cred, err := repo.AccessCredential(cmd.Context(), credID)
@@ -42,7 +42,7 @@ func show(cmd *cobra.Command, args []string) error {
 	if err := clipboard.WriteAll(cred.Password); err != nil {
 		return errors.New("failed to copy pwd")
 	}
-	mango.Debug("copied password to clipboard")
+	slog.Debug("copied password to clipboard")
 
 	return nil
 }

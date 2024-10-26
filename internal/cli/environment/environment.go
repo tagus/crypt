@@ -3,6 +3,7 @@ package environment
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -42,14 +43,13 @@ type InitStoreOpts struct {
 }
 
 func initEnv(ctx context.Context, opts InitStoreOpts) (*Environment, error) {
-	mango.Debug("initializing environment:", opts)
+	slog.Debug("initializing environment", "opts", opts)
 
 	path, err := resolveCryptDBPath(opts.CryptDBPath, !opts.InitFile)
 	if err != nil {
 		return nil, err
 	}
-	mango.Debug("using crypt at: ", color.YellowString(path))
-	mango.Debug("using crypt:", color.YellowString(opts.CryptName))
+	slog.Debug("using crypt", "path", path, "name", opts.CryptName)
 
 	repo, err := dbrepo.Initialize(ctx, path)
 	if err != nil {

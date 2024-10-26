@@ -2,9 +2,8 @@ package cutils
 
 import (
 	"errors"
+	"log/slog"
 	"strings"
-
-	"github.com/tagus/mango"
 
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/cli/environment"
@@ -29,7 +28,7 @@ func ServiceMaybeNew(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(creds) > 0 {
-		mango.Warningf("service %s might already exist", svc)
+		slog.Warn("service might already exist", "service", svc)
 	}
 	return nil
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"log/slog"
 	"os"
 	"time"
 
@@ -24,16 +25,16 @@ var (
 
 func main() {
 	flag.Parse()
-	mango.Init(mango.LogLevelDebug, "import")
+	mango.Init(slog.LevelDebug, "import")
 
 	if *cp == "" {
 		mango.Fatal("crypt file path is required")
 	}
-	mango.Debug("crypt file path: ", *cp)
+	slog.Debug("crypt file path ", "path", *cp)
 	if *db == "" {
 		mango.Fatal("sqlite db file path is required")
 	}
-	mango.Debug("sqlite db file path: ", *db)
+	slog.Debug("sqlite db file path", "path", *db)
 
 	/******************************************************************************/
 
@@ -41,7 +42,7 @@ func main() {
 	ak := asker.DefaultAsker()
 	pwd, err := ak.AskSecret(color.YellowString("pwd"), true)
 	mango.FatalIf(err)
-	mango.Debug("collected password")
+	slog.Debug("collected password")
 
 	signature := []byte(ciphers.ComputeHash(mango.ShortID()))
 	hashedPwd, err := ciphers.ComputeHashPwd(pwd)
@@ -61,7 +62,7 @@ func main() {
 	cr, err := parseCryptFile(*cp)
 	mango.FatalIf(err)
 
-	mango.Debug("importing crypt:", cr.Id)
+	slog.Debug("importing crypt", "id", cr.Id)
 	newCrypt, err := repo.InsertCrypt(
 		ctx,
 		&repos.Crypt{
@@ -94,12 +95,12 @@ func main() {
 			AccessedCount: cred.AccessedCount,
 		})
 		mango.FatalIf(err)
-		mango.Debug("imported service:", newCred.Service, cred.AccessedCount)
+		slog.Debug("imported service", "service", newCred.Service, "accessed_count", cred.AccessedCount)
 	}
 
 	/******************************************************************************/
 
-	mango.Debug("import complete for crypt:", newCrypt.ID)
+	slog.Debug("import complete for crypt", "id", newCrypt.ID)
 }
 
 func parseCryptFile(path string) (*legacycrypt.Crypt, error) {

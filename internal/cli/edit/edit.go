@@ -1,11 +1,12 @@
 package edit
 
 import (
+	"log/slog"
+
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/cli/cutils"
 	"github.com/tagus/crypt/internal/cli/environment"
 	"github.com/tagus/crypt/internal/utils"
-	"github.com/tagus/mango"
 )
 
 var Command = &cobra.Command{
@@ -25,7 +26,7 @@ func edit(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	mango.Debug("selected credential id:", credID)
+	slog.Debug("selected credential", "id", credID)
 
 	repo := env.Repo()
 	cred, err := repo.AccessCredential(cmd.Context(), credID)
@@ -33,7 +34,7 @@ func edit(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	mango.Debug("editing credential:", cred.Service)
+	slog.Debug("editing credential", "service", cred.Service)
 
 	form := &Form{cr: env.Repo()}
 	cred, err = form.Show(cmd.Context(), cred)
@@ -42,10 +43,10 @@ func edit(cmd *cobra.Command, args []string) error {
 	}
 
 	if cred == nil {
-		mango.Warning("no credential was updated")
+		slog.Warn("no credential was updated")
 		return nil
 	}
-	mango.Debug("updated credential:", cred.Service)
+	slog.Debug("updated credential", "service", cred.Service)
 	utils.PrintCredential(cred)
 
 	return nil

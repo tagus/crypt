@@ -1,10 +1,11 @@
 package archive
 
 import (
+	"log/slog"
+
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/cli/cutils"
 	"github.com/tagus/crypt/internal/cli/environment"
-	"github.com/tagus/mango"
 )
 
 var Command = &cobra.Command{
@@ -25,13 +26,13 @@ func archive(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	mango.Debug("selected credential id:", credID)
+	slog.Debug("selected credential id", "id", credID)
 
 	repo := env.Repo()
 	if err := repo.ArchiveCredential(cmd.Context(), credID); err != nil {
 		return err
 	}
-	mango.Debug("archived credential:", credID)
+	slog.Debug("archived credential", "id", credID)
 
 	return nil
 }

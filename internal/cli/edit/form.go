@@ -3,11 +3,13 @@ package edit
 import (
 	"context"
 	"fmt"
+	"log/slog"
+	"strings"
+
 	"github.com/rivo/tview"
 	"github.com/tagus/crypt/internal/cli/environment"
 	"github.com/tagus/crypt/internal/repos"
 	"github.com/tagus/mango"
-	"strings"
 )
 
 type Form struct {
@@ -43,7 +45,7 @@ func (f *Form) Show(ctx context.Context, cred *repos.Credential) (*repos.Credent
 			}
 
 			if cred.Password != updated.Password {
-				mango.Debug("password was modified")
+				slog.Debug("password was modified")
 				if updated.Password != confirmPassword {
 					app.SetRoot(f.buildModal("passwords do not match", func() {
 						app.SetRoot(form, true)

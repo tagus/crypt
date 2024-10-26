@@ -1,6 +1,8 @@
 package add
 
 import (
+	"log/slog"
+
 	"github.com/spf13/cobra"
 	"github.com/tagus/crypt/internal/asker"
 	"github.com/tagus/crypt/internal/cli/cutils"
@@ -65,11 +67,10 @@ func add(cmd *cobra.Command, args []string) error {
 	}
 
 	if cred == nil {
-		mango.Warning("no credential was added")
+		slog.Warn("no credential was added")
 		return nil
 	}
-	mango.Debug(cred)
-	mango.Debug("added credential for", cred.Service)
+	slog.Debug("added credential", "service", cred.Service, "cred", cred)
 	return nil
 }
 
@@ -132,7 +133,7 @@ func buildCredential(service string) (*repos.Credential, error) {
 
 	ok, err := ak.AskConfirm("does this look right?")
 	if !ok {
-		return nil, nil
+		return nil, err
 	}
 
 	return cred, nil

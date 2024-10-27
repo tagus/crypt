@@ -25,7 +25,7 @@ var (
 
 func main() {
 	flag.Parse()
-	mango.Init(slog.LevelDebug, "import")
+	slog.SetLogLoggerLevel(slog.LevelDebug)
 
 	if *cp == "" {
 		mango.Fatal("crypt file path is required")

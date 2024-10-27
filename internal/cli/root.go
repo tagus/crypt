@@ -94,10 +94,10 @@ func initialize(cmd *cobra.Command, args []string) error {
 	}
 
 	if isVerbose {
-		mango.Init(slog.LevelDebug, "import")
+		slog.SetLogLoggerLevel(slog.LevelDebug)
 		slog.Debug("log level is set to verbose")
 	} else {
-		mango.Init(slog.LevelInfo, "import")
+		slog.SetLogLoggerLevel(slog.LevelInfo)
 	}
 
 	return nil

@@ -1,6 +1,8 @@
 module github.com/tagus/crypt
 
-go 1.20
+go 1.23
+
+toolchain go1.23.2
 
 require (
 	github.com/Masterminds/squirrel v1.5.4

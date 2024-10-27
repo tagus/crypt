@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	cp   = flag.String("crypt", "", "crypt file path")
+	cp   = flag.String("crypt", "", "exported legacy crypt json file path")
 	db   = flag.String("db", "", "sqlite db file path")
 	name = flag.String("name", "main", "crypt name")
 )
@@ -103,6 +103,7 @@ func main() {
 	slog.Debug("import complete for crypt", "id", newCrypt.ID)
 }
 
+// parseCryptFile expects the decrypted crypt file at the given path
 func parseCryptFile(path string) (*legacycrypt.Crypt, error) {
 	buf, err := os.ReadFile(path)
 	if err != nil {

@@ -15,7 +15,7 @@ require (
 	github.com/rivo/tview v0.0.0-20240524063012-037df494fb76
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0
-	github.com/tagus/mango v0.2.11
+	github.com/tagus/mango v0.3.0
 	github.com/teris-io/shortid v0.0.0-20220617161101-71ec9f2aa569
 	golang.org/x/crypto v0.23.0
 )
@@ -45,5 +45,3 @@ require (
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/tagus/mango => ../mango/

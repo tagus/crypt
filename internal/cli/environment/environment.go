@@ -106,9 +106,12 @@ func initEnv(ctx context.Context, opts InitStoreOpts) (*Environment, error) {
 	}, nil
 }
 
-// resolveCryptDBPath determines the path of the crypt db to be used, the `crypt-db`
-// flag takes priority, falling back to a `CRYPT_DB` env var, `.crypt.db` in the current working
-// directory and finally defaulting to a `.crypt.db` in the current user's home directory
+// resolveCryptDBPath determines the path of the crypt db to be used in the following order:
+//   - the `crypt-db` flag
+//   - `CRYPT_DB` env var
+//   - ./.crypt.db
+//   - ~/.crypt.db
+//   - ~/.config/crypt/crypt.db
 func resolveCryptDBPath(cryptDBPath string, checkPath bool) (string, error) {
 	wd, err := os.Getwd()
 	if err != nil {
@@ -124,6 +127,7 @@ func resolveCryptDBPath(cryptDBPath string, checkPath bool) (string, error) {
 		os.Getenv("CRYPT_DB"),
 		filepath.Join(wd, ".crypt.db"),
 		filepath.Join(hd, ".crypt.db"),
+		filepath.Join(hd, ".config", "crypt", "crypt.db"),
 	}
 
 	for _, path := range paths {

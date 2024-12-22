@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	Version     = "v2.1.1"
+	Version     = "v2.1.2"
 	VerboseFlag = "verbose"
 	LogPrefix   = "crypt"
 )

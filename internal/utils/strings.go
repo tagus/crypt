@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"github.com/fatih/color"
 	"github.com/tagus/crypt/internal/repos"
 	"github.com/tagus/mango"
 	"os"
@@ -68,7 +67,7 @@ func PrintCredential(cred *repos.Credential) {
 
 func getFallbackString(field string) string {
 	if field == "" {
-		return color.WhiteString("N/A")
+		return mango.ColorizeWhite("N/A")
 	}
 	return field
 }

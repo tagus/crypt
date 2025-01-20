@@ -9,7 +9,6 @@ import (
 
 	"github.com/tagus/crypt/internal/repos/cryptrepo"
 
-	"github.com/fatih/color"
 	"github.com/mitchellh/go-homedir"
 	"github.com/tagus/crypt/internal/asker"
 	"github.com/tagus/crypt/internal/ciphers"
@@ -59,7 +58,7 @@ func initEnv(ctx context.Context, opts InitStoreOpts) (*Environment, error) {
 	/******************************************************************************/
 
 	ak := asker.DefaultAsker()
-	pwd, err := ak.AskSecret(color.YellowString("pwd"), false)
+	pwd, err := ak.AskSecret(mango.ColorizeYellow("pwd"), false)
 	if err != nil {
 		return nil, err
 	}

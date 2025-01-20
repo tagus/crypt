@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	Version     = "v2.1.2"
+	Version     = "v2.1.3"
 	VerboseFlag = "verbose"
 	AppLabel    = "crypt"
 )

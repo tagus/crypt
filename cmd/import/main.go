@@ -8,7 +8,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/tagus/crypt/internal/asker"
 	"github.com/tagus/crypt/internal/ciphers"
 	"github.com/tagus/crypt/internal/ciphers/aescipher"
@@ -41,7 +40,7 @@ func main() {
 
 	// asking user for master password that will be used to decrypt the secure values
 	ak := asker.DefaultAsker()
-	pwd, err := ak.AskSecret(color.YellowString("pwd"), true)
+	pwd, err := ak.AskSecret(mango.ColorizeYellow("pwd"), true)
 	mango.FatalIf(err)
 	slog.Debug("collected password")
 

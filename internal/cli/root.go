@@ -24,6 +24,7 @@ import (
 const (
 	Version     = "v2.1.2"
 	VerboseFlag = "verbose"
+	AppLabel    = "crypt"
 )
 
 var rootCmd = &cobra.Command{
@@ -94,13 +95,10 @@ func initialize(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-
+	level := slog.LevelInfo
 	if isVerbose {
-		slog.SetLogLoggerLevel(slog.LevelDebug)
-		slog.Debug("log level is set to verbose")
-	} else {
-		slog.SetLogLoggerLevel(slog.LevelInfo)
+		level = slog.LevelDebug
 	}
-
+	mango.Init(level, AppLabel)
 	return nil
 }

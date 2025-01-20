@@ -10,8 +10,8 @@ crypt:
 crypt.linux:
 	$(FORLINUX) $(GO) build -o crypt.linux ./cmd/crypt/main.go
 
-install:
-	$(GO) install ./cmd/crypt
+install: crypt
+	mv crypt ${GOBIN}/crypt
 
 clean:
 	rm -f crypt

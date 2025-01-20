@@ -20,6 +20,11 @@ jobs:
     - name: install dependencies
       run: go mod download
 
+    - name: copy local mango package
+      run: |
+        mkdir -p ../mango
+        cp -r $GOPATH/src/github.com/tagus/mango/ ../mango/
+
     - name: running all tests
       run: go test -v ./...
       env:

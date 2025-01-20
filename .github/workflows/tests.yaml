@@ -17,13 +17,13 @@ jobs:
       with:
         go-version: '1.23'
 
-    - name: install dependencies
-      run: go mod download
-
     - name: copy local mango package
       run: |
         mkdir -p ../mango
-        cp -r $GOPATH/src/github.com/tagus/mango/ ../mango/
+        git clone https://github.com/tagus/mango.git ../mango/
+
+    - name: install dependencies
+      run: go mod download
 
     - name: running all tests
       run: go test -v ./...

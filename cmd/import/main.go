@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log/slog"
 	"os"
 	"time"
@@ -28,11 +29,11 @@ func main() {
 	slog.SetLogLoggerLevel(slog.LevelDebug)
 
 	if *cp == "" {
-		mango.Fatal("crypt file path is required")
+		mango.Fatal(fmt.Errorf("crypt file path is required"))
 	}
 	slog.Debug("crypt file path ", "path", *cp)
 	if *db == "" {
-		mango.Fatal("sqlite db file path is required")
+		mango.Fatal(fmt.Errorf("sqlite db file path is required"))
 	}
 	slog.Debug("sqlite db file path", "path", *db)
 

@@ -1,8 +1,7 @@
 module github.com/tagus/crypt
 
 go 1.23
-
-toolchain go1.23.2
+toolchain go1.24.1
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
@@ -16,7 +15,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/tagus/mango v0.3.3
 	github.com/teris-io/shortid v0.0.0-20220617161101-71ec9f2aa569
-	golang.org/x/crypto v0.32.0
+	golang.org/x/crypto v0.36.0
 )
 
 require (
@@ -33,11 +32,11 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	golang.org/x/net v0.21.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/oauth2 v0.11.0 // indirect
-	golang.org/x/sys v0.29.0 // indirect
-	golang.org/x/term v0.28.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/term v0.30.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

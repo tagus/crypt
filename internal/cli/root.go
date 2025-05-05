@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	Version     = "v2.1.3"
+	Version     = "v2.1.4"
 	VerboseFlag = "verbose"
 	AppLabel    = "crypt"
 )
@@ -43,7 +43,8 @@ The db file can be specified using the following methods listed here in decreasi
 	1. db flag
 	2. CRYPT_DB env variable
 	3. ./.crypt.db
-	4. ~/.crypt.db`,
+	4. ~/.crypt.db,
+	5. ~/.config/crypt.db`,
 	SilenceUsage:      true,
 	SilenceErrors:     true,
 	Version:           Version,

@@ -126,7 +126,7 @@ func resolveCryptDBPath(cryptDBPath string, checkPath bool) (string, error) {
 		os.Getenv("CRYPT_DB"),
 		filepath.Join(wd, ".crypt.db"),
 		filepath.Join(hd, ".crypt.db"),
-		filepath.Join(hd, ".config", "crypt", "crypt.db"),
+		filepath.Join(hd, ".config", ".crypt.db"),
 	}
 
 	for _, path := range paths {

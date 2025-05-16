@@ -37,9 +37,10 @@ func info(cmd *cobra.Command, args []string) error {
 	data := [][]string{
 		{"id", crypt.ID},
 		{"name", crypt.Name},
-		{"credentials", strconv.Itoa(crypt.TotalActiveCredentials)},
+		{"total credentials", strconv.Itoa(crypt.TotalActiveCredentials)},
 		{"created at", crypt.CreatedAt.Format("01/02/2006")},
 		{"updated at", crypt.UpdatedAt.Format("01/02/2006")},
+		{"cryptfile path", env.CryptFilePath()},
 	}
 	fmt.Println(title)
 	utils.PrintTable(data, utils.TableOpts{})

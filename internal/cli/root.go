@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	Version     = "v2.1.4"
+	Version     = "v2.1.5"
 	VerboseFlag = "verbose"
 	AppLabel    = "crypt"
 )
@@ -44,7 +44,7 @@ The db file can be specified using the following methods listed here in decreasi
 	2. CRYPT_DB env variable
 	3. ./.crypt.db
 	4. ~/.crypt.db,
-	5. ~/.config/crypt.db`,
+	5. ~/.config/.crypt.db`,
 	SilenceUsage:      true,
 	SilenceErrors:     true,
 	Version:           Version,
@@ -82,7 +82,7 @@ func Execute() {
 			os.Exit(0)
 		} else {
 			isVerbose, _ := rootCmd.Flags().GetBool(VerboseFlag)
-			if isVerbose {
+			if !isVerbose {
 				slog.Error(err.Error())
 			} else {
 				mango.Fatal(err)

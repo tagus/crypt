@@ -19,6 +19,7 @@ import (
 )
 
 type Environment struct {
+	path  string
 	repo  *dbrepo.DbRepo
 	cr    CryptRepo
 	crypt *repos.Crypt
@@ -99,6 +100,7 @@ func initEnv(ctx context.Context, opts InitStoreOpts) (*Environment, error) {
 	}
 
 	return &Environment{
+		path:  path,
 		repo:  repo,
 		cr:    cryptrepo.New(repo, crypt.ID, ci),
 		crypt: crypt,
@@ -110,7 +112,7 @@ func initEnv(ctx context.Context, opts InitStoreOpts) (*Environment, error) {
 //   - `CRYPT_DB` env var
 //   - ./.crypt.db
 //   - ~/.crypt.db
-//   - ~/.config/crypt/crypt.db
+//   - ~/.config/crypt.db
 func resolveCryptDBPath(cryptDBPath string, checkPath bool) (string, error) {
 	wd, err := os.Getwd()
 	if err != nil {
@@ -148,6 +150,10 @@ func (e *Environment) Crypt() *repos.Crypt {
 
 func (e *Environment) Repo() CryptRepo {
 	return e.cr
+}
+
+func (e *Environment) CryptFilePath() string {
+	return e.path
 }
 
 func (e *Environment) Close() error {

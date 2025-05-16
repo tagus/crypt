@@ -5,10 +5,10 @@ test:
 	$(GO) test ./internal/...
 
 crypt:
-	$(GO) build -o crypt ./cmd/crypt/main.go
+	$(GO) build --tags "fts5" -o crypt ./cmd/crypt/main.go
 
 crypt.linux:
-	$(FORLINUX) $(GO) build -o crypt.linux ./cmd/crypt/main.go
+	$(FORLINUX) $(GO) build --tags "fts5" -o crypt.linux ./cmd/crypt/main.go
 
 install: crypt
 	mv crypt ${GOBIN}/crypt
